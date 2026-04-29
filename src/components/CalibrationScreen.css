@@ -1,0 +1,70 @@
+/* Ekranın tamamını kaplayan nötr gri arka plan */
+.calibration-fullscreen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #e0e0e0; /* Nötr açık gri - EEG standartı */
+  z-index: 9999; /* Her şeyin üstünde görünmesi için */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.calibration-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Fixation Cross (Odak Artısı) */
+.fixation-cross {
+  font-size: 120px;
+  font-weight: 300;
+  color: #333333; /* Tam siyah yerine koyu gri gözü daha az yorar */
+  margin-bottom: 50px;
+  line-height: 1;
+  user-select: none;
+}
+
+.calibration-info {
+  text-align: center;
+  color: #555555;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.calibration-info h2 {
+  margin-bottom: 10px;
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.calibration-info p {
+  font-size: 16px;
+  margin-bottom: 20px;
+  max-width: 400px;
+}
+
+/* İlerleme Çubuğu */
+.calib-progress-bar {
+  width: 100%;
+  max-width: 300px;
+  height: 8px;
+  background-color: #cccccc;
+  border-radius: 4px;
+  margin: 0 auto 10px auto;
+  overflow: hidden;
+}
+
+.calib-progress-fill {
+  height: 100%;
+  background-color: #6c5ce7; /* Senin tasarımındaki mor tonu hafifçe kullanabiliriz */
+  transition: width 1s linear;
+}
+
+.calib-timer {
+  font-size: 14px;
+  font-weight: bold;
+}
