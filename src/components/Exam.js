@@ -2,120 +2,239 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { questions, timeByDifficulty, difficultyOrder } from '../data/questions';
 import './Exam.css';
 
-const Exam = ({ userInfo, startDifficultyIndex, onFinishLevel, onFinishExam }) => {
-  const [currentDifficultyIndex, setCurrentDifficultyIndex] = useState(startDifficultyIndex);
+// ============================================================================
+// Exam Component (v2.0)
+// ----------------------------------------------------------------------------
+// EEG çalışması için yeniden yapılandırıldı:
+//
+// State machine:
+//   'idle' → 'fixation' → 'question' → 'transition' → 'fixation' → ...
+//
+// Özellikler:
+// - 1.5 sn fixation cross (her sorudan önce)
+// - Milisaniye hassasiyetinde RT (performance.now())
+// - EEG marker gönderme (block_start, question_onset, question_response, vb.)
+// - Otomatik geçiş (seçim = cevap, feedback yok)
+// - Self-paced + maksimum süre
+// ============================================================================
+
+
+const Exam = ({ userInfo, startDifficultyIndex, onFinishLevel, onFinishExam, syncMarker }) => {
+  // ---- State Machine ----
+  const [phase, setPhase] = useState('question');
+  const [currentDifficultyIndex] = useState(startDifficultyIndex);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [timeLeft, setTimeLeft] = useState(null);
 
-  const [isPaused, setIsPaused] = useState(false);
+  // ---- Refs ----
   const timerRef = useRef(null);
+  const questionStartTimeRef = useRef(null);  // performance.now() değeri
   const hasSubmittedRef = useRef(false);
+  const blockStartSentRef = useRef(false);    // Blok başlangıç marker'ı bir kez gönderilsin
+
+  // ---- Türetilmiş değerler ----
   const currentDifficulty = difficultyOrder[currentDifficultyIndex];
   const currentQuestions = questions[currentDifficulty];
   const currentQuestion = currentQuestions[currentQuestionIndex];
   const maxTime = timeByDifficulty[currentDifficulty];
-  const timePercentage = maxTime ? (timeLeft / maxTime) * 100 : 0;
+  const timePercentage = (maxTime && timeLeft !== null) ? (timeLeft / maxTime) * 100 : 0;
+  const progressPercentage = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
 
+  // ---- Marker yardımcısı ----
+  const sendMarker = useCallback((eventType, metadata = {}) => {
+    if (typeof syncMarker === 'function') {
+      syncMarker(eventType, performance.now(), metadata);
+    }
+  }, [syncMarker]);
+
+  // =========================================================================
+  // FAZ 1: BAŞLANGIÇ — Blok başlangıcı
+  // =========================================================================
   useEffect(() => {
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
-    setIsPaused(false);
     hasSubmittedRef.current = false;
-  }, [currentDifficultyIndex]);
+    blockStartSentRef.current = false;
+    setPhase('question');  
 
-  const handleAnswerSubmit = useCallback(
-        (answer = selectedAnswer) => {
-          if (hasSubmittedRef.current) return;
-          hasSubmittedRef.current = true;
+    if (!blockStartSentRef.current) {
+      sendMarker('block_start', {
+        difficulty: currentDifficulty,
+        difficulty_index: currentDifficultyIndex,
+        total_questions: currentQuestions.length
+      });
+      blockStartSentRef.current = true;
+    }
+  }, [currentDifficultyIndex, currentDifficulty, currentQuestions.length, sendMarker]); 
 
-          const isCorrect = answer !== null && answer === currentQuestion.correctAnswer;
-
-          const answerData = {
-            questionId: currentQuestion.id,
-            difficulty: currentDifficulty,
-            selectedAnswer: answer,
-            correctAnswer: currentQuestion.correctAnswer,
-            isCorrect,
-            points: isCorrect ? currentQuestion.points : 0,
-            timeUsed: maxTime - timeLeft,
-            question: currentQuestion.question
-          };
-
-          setAnswers(prev => [...prev, answerData]);
-
-          //  Aynı seviyede devam
-          if (currentQuestionIndex < currentQuestions.length - 1) {
-            setCurrentQuestionIndex(i => i + 1);
-            setSelectedAnswer(null);
-            hasSubmittedRef.current = false;
-            return;
-          }
-          const levelAnswers = [...answers, answerData].filter(
-            a => a.difficulty === currentDifficulty
-          );
-
-          onFinishLevel(currentDifficulty, levelAnswers);
-
-          // Son seviye değilse devam
-          if (currentDifficultyIndex < difficultyOrder.length - 1) {
-            setCurrentDifficultyIndex(i => i + 1);
-            setCurrentQuestionIndex(0);
-            setSelectedAnswer(null);
-            hasSubmittedRef.current = false;
-            return;
-          }
-        },
-        [
-          selectedAnswer,
-          currentQuestion,
-          currentDifficulty,
-          currentQuestionIndex,
-          currentQuestions.length,
-          currentDifficultyIndex,
-          maxTime,
-          timeLeft,
-          answers,
-          onFinishLevel,
-          onFinishExam
-        ]
-      ); // Properly closed useCallback hook
-
+  // =========================================================================
+  // FAZ 3: QUESTION — Soruyu göster, timer başlat
+  // =========================================================================
   useEffect(() => {
-  setTimeLeft(maxTime);
-  setIsPaused(false);
-  hasSubmittedRef.current = false;
-}, [currentDifficultyIndex, currentQuestionIndex, maxTime]);
+    if (phase !== 'question') return;
 
+    // Soru başlangıç zamanı (RT için)
+    questionStartTimeRef.current = performance.now();
 
-  useEffect(() => {
-    if (isPaused) return;
+    // Question onset marker (RT analizinin başlangıç noktası)
+    sendMarker('question_onset', {
+      question_id: currentQuestion.id,
+      difficulty: currentDifficulty,
+      category: currentQuestion.category,
+      question_index: currentQuestionIndex
+    });
+
+    // Timer'ı sıfırla ve başlat
+    setTimeLeft(maxTime);
+    setSelectedAnswer(null);
+    hasSubmittedRef.current = false;
+
+    // Saniye sayacı
     clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => (prev <= 1 ? 0 : prev - 1));
     }, 1000);
-    return () => clearInterval(timerRef.current);
-  }, [isPaused]);
 
-  useEffect(() => {
-    if (timeLeft === 0 && !isPaused && selectedAnswer === null) {
-      setIsPaused(true);
-      handleAnswerSubmit(null);
+    return () => clearInterval(timerRef.current);
+  }, [phase, currentQuestionIndex, currentQuestion, currentDifficulty, maxTime, sendMarker]);
+
+  // =========================================================================
+  // CEVAP/TIMEOUT İŞLEME
+  // =========================================================================
+  const submitAnswer = useCallback((selectedIndex, isTimeout = false) => {
+    if (hasSubmittedRef.current) return;
+    hasSubmittedRef.current = true;
+
+    // Timer'ları durdur
+    clearInterval(timerRef.current);
+
+    // RT hesapla (milisaniye)
+    const rtMs = questionStartTimeRef.current
+      ? Math.round(performance.now() - questionStartTimeRef.current)
+      : null;
+
+    const isCorrect = selectedIndex !== null && selectedIndex === currentQuestion.correctAnswer;
+
+    const answerData = {
+      questionId: currentQuestion.id,
+      difficulty: currentDifficulty,
+      category: currentQuestion.category,
+      selectedAnswer: selectedIndex,
+      correctAnswer: currentQuestion.correctAnswer,
+      isCorrect,
+      points: isCorrect ? currentQuestion.points : 0,
+      timeUsed: maxTime - timeLeft,
+      rt_ms: rtMs,
+      question: currentQuestion.question,
+      timedOut: isTimeout
+    };
+
+    // Cevap marker'ı
+    sendMarker(isTimeout ? 'question_timeout' : 'question_response', {
+      question_id: currentQuestion.id,
+      difficulty: currentDifficulty,
+      category: currentQuestion.category,
+      selected_answer: selectedIndex,
+      correct_answer: currentQuestion.correctAnswer,
+      is_correct: isCorrect,
+      rt_ms: rtMs
+    });
+
+    // State güncelle
+    setAnswers(prev => [...prev, answerData]);
+
+    // Sonraki soruya veya bloğun sonuna geç
+    if (currentQuestionIndex >= currentQuestions.length - 1) {
+      sendMarker('block_end', {
+        difficulty: currentDifficulty,
+        difficulty_index: currentDifficultyIndex
+      });
+
+      const levelAnswers = [...answers, answerData].filter(
+        a => a.difficulty === currentDifficulty
+      );
+
+      onFinishLevel(currentDifficulty, levelAnswers);
+
+      if (currentDifficultyIndex >= difficultyOrder.length - 1) {
+        if (typeof onFinishExam === 'function') {
+          onFinishExam([...answers, answerData]);
+        }
+      }
+    } else {
+      setCurrentQuestionIndex(i => i + 1);
+      setPhase('question');  
     }
-  }, [timeLeft, isPaused, selectedAnswer, handleAnswerSubmit]);
-  const handleAnswerSelect = index => {
-    if (!isPaused) setSelectedAnswer(index);
+  }, [
+    currentQuestion,
+    currentDifficulty,
+    currentDifficultyIndex,
+    currentQuestionIndex,
+    currentQuestions.length,
+    maxTime,
+    timeLeft,
+    answers,
+    onFinishLevel,
+    onFinishExam,
+    sendMarker
+  ]);
+
+  // =========================================================================
+  // TIMEOUT KONTROLÜ
+  // =========================================================================
+  useEffect(() => {
+    if (phase === 'question' && timeLeft === 0 && !hasSubmittedRef.current) {
+      submitAnswer(null, true);
+    }
+  }, [timeLeft, phase, submitAnswer]);
+
+  // =========================================================================
+  // CLEAN-UP
+  // =========================================================================
+  useEffect(() => {
+    return () => {
+      clearInterval(timerRef.current);
+      };
+  }, []);
+
+  // =========================================================================
+  // KULLANICI ETKİLEŞİMİ
+  // =========================================================================
+  const handleAnswerClick = (index) => {
+    if (phase !== 'question' || hasSubmittedRef.current) return;
+    setSelectedAnswer(index);
+    submitAnswer(index, false);
   };
-  const formatTime = sec =>
-    `${Math.floor(sec / 60)}:${(sec % 60).toString().padStart(2, '0')}`;
+
+  // ---- Yardımcı fonksiyonlar ----
+  const formatTime = sec => {
+    if (sec === null) return '--:--';
+    return `${Math.floor(sec / 60)}:${(sec % 60).toString().padStart(2, '0')}`;
+  };
 
   const getDifficultyLabel = diff =>
     ({ kolay: 'Kolay', orta: 'Orta', zor: 'Zor' }[diff]);
 
   const getDifficultyColor = diff =>
     ({ kolay: '#27ae60', orta: '#f39c12', zor: '#e74c3c' }[diff]);
-  const progressPercentage = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
+
+  // =========================================================================
+  // RENDER
+  // =========================================================================
+
+  // FIXATION FAZİ (artık görünmeyecek)
+  if (phase === 'fixation' || phase === 'idle') {
+    return null;
+  }
+
+  // TRANSITION FAZİ (artık görünmeyecek)
+  if (phase === 'transition') {
+    return null;
+  }
+
+  // QUESTION FAZİ — Normal soru ekranı
   return (
     <div className="exam-container">
       <div className="exam-card">
@@ -157,7 +276,7 @@ const Exam = ({ userInfo, startDifficultyIndex, onFinishLevel, onFinishExam }) =
           </div>
         </div>
 
-        {/* DIFFICULTY */}
+        {/* DIFFICULTY BADGE */}
         <div
           className="difficulty-badge"
           style={{
@@ -179,9 +298,9 @@ const Exam = ({ userInfo, startDifficultyIndex, onFinishLevel, onFinishExam }) =
                 key={index}
                 className={`option-button ${
                   selectedAnswer === index ? 'selected' : ''
-                } ${isPaused ? 'disabled' : ''}`}
-                onClick={() => handleAnswerSelect(index)}
-                disabled={isPaused}
+                }`}
+                onClick={() => handleAnswerClick(index)}
+                disabled={hasSubmittedRef.current}
               >
                 <span className="option-letter">
                   {String.fromCharCode(65 + index)}
@@ -192,22 +311,16 @@ const Exam = ({ userInfo, startDifficultyIndex, onFinishLevel, onFinishExam }) =
           </div>
         </div>
 
-        {/* ACTION */}
-        <div className="exam-actions">
-          <button
-            className="submit-answer-button"
-            onClick={() => handleAnswerSubmit()}
-            disabled={selectedAnswer === null || isPaused}
-          >
-            {currentQuestionIndex === currentQuestions.length - 1
-              ? 'Seviyeyi Bitir'
-              : 'Sonraki Soru'}
-          </button>
+        {/* Otomatik geçiş bilgisi */}
+        <div className="exam-info-footer">
+          <p className="auto-advance-info">
+            Bir seçeneğe tıkladığınızda otomatik olarak sonraki soruya geçilecektir.
+          </p>
         </div>
 
       </div>
     </div>
   );
-}
+};
 
 export default Exam;

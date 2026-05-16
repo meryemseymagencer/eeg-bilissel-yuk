@@ -318,3 +318,59 @@
   }
 }
 
+/* ============================================================================
+   Exam.css — Yeni eklenen bölümler için stiller
+   ----------------------------------------------------------------------------
+   Mevcut Exam.css dosyanın SONUNA bu kuralları EKLE.
+   Eski stiller (exam-container, exam-card, vb.) korunuyor.
+   ============================================================================ */
+
+/* ---- Fixation Cross Ekranı (sorular arası) ---- */
+.fixation-screen {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+}
+
+.fixation-cross-large {
+  font-size: 96px;
+  font-weight: 300;
+  color: #2c3e50;
+  line-height: 1;
+  user-select: none;
+  font-family: monospace, 'Courier New';
+}
+
+/* Transition fazında biraz daha soluk göster (UI feedback) */
+.fixation-cross-large.transition {
+  opacity: 0.4;
+  transition: opacity 0.1s;
+}
+
+/* ---- Otomatik geçiş bilgi metni ---- */
+.exam-info-footer {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #ecf0f1;
+  text-align: center;
+}
+
+.auto-advance-info {
+  font-size: 13px;
+  color: #7f8c8d;
+  font-style: italic;
+  margin: 0;
+}
+
+/* ---- Option button disabled state (cevap verildikten sonra) ---- */
+.option-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.option-button.selected:disabled {
+  opacity: 1;  /* Seçilen şık tam görünür kalsın */
+}

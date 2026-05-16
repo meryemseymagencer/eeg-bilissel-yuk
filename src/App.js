@@ -3,7 +3,7 @@ import UserForm from './components/UserForm';
 import Exam from './components/Exam';
 import Result from './components/Result';
 import NasaTLX from './components/NasaTLX';
-import CalibrationScreen from './components/CalibrationScreen'; // 1. EKLENDİ: Kalibrasyon bileşeni
+import CalibrationScreen from './components/CalibrationScreen';
 import useSession from './hooks/useSession';
 import useEEGStream from './hooks/useEEGStream';
 import './App.css';
@@ -14,27 +14,54 @@ function App() {
   const [answers, setAnswers] = useState([]);
   const [difficultyIndex, setDifficultyIndex] = useState(0);
   const [currentDifficulty, setCurrentDifficulty] = useState(null);
+
+  // NASA-TLX yeni veri yapısı:
+  // { kolay: {rtlxScore, rawValues, adjustedValues}, orta: {...}, zor: {...} }
   const [nasaByDifficulty, setNasaByDifficulty] = useState({
     kolay: null,
     orta: null,
     zor: null
   });
 
-  // Backend entegrasyonu
-  const { sessionId, backendOnline, createSession, syncAnswers, syncNasa, reset: resetSession } = useSession();
-  
-  // 2. GÜNCELLENDİ: Kalibrasyon sırasında da veri akması için 'calibration' eklendi
+  // ⚡ Yeni: syncMarker ve syncNasaDetailed eklendi
+  const {
+    sessionId,
+    backendOnline,
+    createSession,
+    syncAnswers,
+    syncNasa,           // Eski format (geriye dönük uyumluluk)
+    syncNasaDetailed,   // ⚡ Yeni
+    syncMarker,         // ⚡ Yeni — Exam.js'e geçilecek
+    reset: resetSession
+  } = useSession();
+
   const eegActive = step === 'calibration' || step === 'exam' || step === 'nasa';
-  
-  // 3. GÜNCELLENDİ: appState verisini useEEGStream'den çekiyoruz
+
   const { cognitiveLoad, timeline, connected: eegConnected, appState } = useEEGStream(sessionId, eegActive);
 
-  // 4. EKLENDİ: Backend "testing" moduna geçince otomatik olarak sınavı başlatır
+  // Backend "testing" sinyali gelince sınava geç
   useEffect(() => {
     if (step === 'calibration' && appState === 'testing') {
+      syncMarker('calibration_end', performance.now(), {});
       setStep('exam');
     }
-  }, [step, appState]);
+  }, [step, appState, syncMarker]);
+
+  // Kalibrasyon başlangıç marker'ı
+  useEffect(() => {
+    if (step === 'calibration' && sessionId) {
+      syncMarker('calibration_start', performance.now(), {});
+    }
+  }, [step, sessionId, syncMarker]);
+
+  // NASA-TLX onset marker (her seviye sonrası)
+  useEffect(() => {
+    if (step === 'nasa' && currentDifficulty) {
+      syncMarker('nasa_onset', performance.now(), {
+        difficulty: currentDifficulty
+      });
+    }
+  }, [step, currentDifficulty, syncMarker]);
 
   const resetApp = () => {
     setStep('form');
@@ -55,20 +82,16 @@ function App() {
             setUserInfo(info);
             setDifficultyIndex(0);
             setCurrentDifficulty(null);
-            
-            // 5. GÜNCELLENDİ: Form bitince doğrudan sınava değil, kalibrasyona geçiyoruz
-            setStep('calibration'); 
-            
-            createSession(info); // fire-and-forget; başarısız olursa uygulama devam eder
+            setStep('calibration');
+            createSession(info);
           }}
         />
       )}
 
-      {/* 6. EKLENDİ: KALİBRASYON AŞAMASI */}
       {step === 'calibration' && (
-        <CalibrationScreen 
+        <CalibrationScreen
           appState={appState}
-          onCalibrationComplete={() => setStep('exam')} 
+          onCalibrationComplete={() => setStep('exam')}
         />
       )}
 
@@ -76,15 +99,16 @@ function App() {
         <Exam
           userInfo={userInfo}
           startDifficultyIndex={difficultyIndex}
+          syncMarker={syncMarker}              // ⚡ Yeni: marker gönderme
           onFinishLevel={(level, levelAnswers) => {
             setAnswers(prev => [...prev, ...levelAnswers]);
             setCurrentDifficulty(level);
             setDifficultyIndex(prev => prev + 1);
             setStep('nasa');
-            syncAnswers(levelAnswers); // fire-and-forget
+            syncAnswers(levelAnswers);
           }}
           onFinishExam={(allAnswers) => {
-            setStep('result');
+            console.log('[App] Sınav tamamlandı, toplam cevap:', allAnswers.length);
           }}
         />
       )}
@@ -92,17 +116,37 @@ function App() {
       {step === 'nasa' && currentDifficulty && (
         <NasaTLX
           difficulty={currentDifficulty}
-          onSubmit={(values) => {
-            const avg = Object.values(values).reduce((a, b) => a + b, 0) / 6;
+          onSubmit={(nasaResult) => {
+            // ⚡ Yeni NASA-TLX veri yapısı
+            // nasaResult = { rawValues, adjustedValues, rtlxScore, difficulty }
 
+            // NASA-TLX submit marker'ı
+            syncMarker('nasa_submit', performance.now(), {
+              difficulty: currentDifficulty,
+              rtlx_score: nasaResult.rtlxScore
+            });
+
+            // State'e kaydet
             setNasaByDifficulty(prev => ({
               ...prev,
-              [currentDifficulty]: avg.toFixed(1)
+              [currentDifficulty]: {
+                rtlxScore: nasaResult.rtlxScore,
+                rawValues: nasaResult.rawValues,
+                adjustedValues: nasaResult.adjustedValues
+              }
             }));
-            syncNasa(currentDifficulty, avg.toFixed(1)); // fire-and-forget
 
-            // EĞER ZOR SEVİYEYSE → RESULT
-            if (difficultyIndex >= 3)  {
+            // Backend'e gönder — hem eski hem yeni endpoint
+            syncNasa(currentDifficulty, nasaResult.rtlxScore.toFixed(1));
+            syncNasaDetailed({
+              difficulty: currentDifficulty,
+              rtlxScore: nasaResult.rtlxScore,
+              rawValues: nasaResult.rawValues,
+              adjustedValues: nasaResult.adjustedValues
+            });
+
+            // Sonraki adım: zor seviye bittiyse result, değilse sınava devam
+            if (difficultyIndex >= 3) {
               setStep('result');
             } else {
               setStep('exam');
@@ -121,7 +165,7 @@ function App() {
           onRestart={resetApp}
         />
       )}
-      
+
     </div>
   );
 }
