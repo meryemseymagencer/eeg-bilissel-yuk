@@ -104,63 +104,49 @@
   font-weight: 700;
   color: #333;
 }
-
-
 .result-actions {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 12px;
 }
-
 .restart-button {
-  padding: 15px 40px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    padding: 15px 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
-
 .restart-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
 }
-
-.restart-button:active {
-  transform: translateY(0);
-}
-
 /* === SESSION ID === */
-
 .result-session-id {
   font-size: 0.8rem;
   color: #aaa;
   margin-top: 6px;
   font-family: monospace;
 }
-
 /* === EEG BİLİŞSEL YÜK ÖZETİ === */
-
 .eeg-summary {
   margin: 32px 0;
 }
-
 .eeg-no-data {
   opacity: 0.55;
 }
-
 .eeg-offline-msg {
   text-align: center;
   color: #999;
   font-size: 0.95rem;
   padding: 16px 0;
 }
-
 /* Baskın yük satırı */
 .eeg-dominant {
   display: flex;
@@ -246,13 +232,14 @@
   cursor: pointer;
   transition: all 0.25s ease;
 }
-
+/*
 .export-button:hover:not(:disabled) {
   background: #667eea;
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 14px rgba(102, 126, 234, 0.35);
 }
+*/
 
 .export-button:active:not(:disabled) {
   transform: translateY(0);
@@ -263,13 +250,13 @@
   color: #27ae60;
   background: #f0faf4;
 }
-
+/*
 .export-button.export-eeg:hover:not(:disabled) {
   background: #27ae60;
   color: white;
   box-shadow: 0 4px 14px rgba(39, 174, 96, 0.35);
 }
-
+*/
 .export-button:disabled {
   opacity: 0.35;
   cursor: not-allowed;
@@ -352,12 +339,12 @@
   margin-bottom: 18px;
   transition: all 0.25s ease;
 }
-
+/*
 .level-row:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
-
+*/
 /* SOL: Seviye adı */
 .level-name {
   font-weight: 700;
@@ -417,5 +404,129 @@
 
   .level-nasa {
     justify-content: center;
+  }
+}
+/* ============================================================================
+   Result.css — Yeni eklenen bölümler için stiller
+   ----------------------------------------------------------------------------
+   Mevcut Result.css dosyanın SONUNA bu kuralları EKLE.
+   Eski stiller (result-container, result-card, level-row vb.) korunuyor.
+   ============================================================================ */
+
+/* ---- Subtitle (kullanıcı adı) ---- */
+.result-subtitle {
+  font-size: 16px;
+  color: #7f8c8d;
+  margin: 4px 0 2px 0;
+  font-weight: 500;
+}
+
+/* ---- NASA-TLX Radar Section ---- */
+.nasa-radar-section {
+  margin-top: 32px;
+  padding: 24px;
+  background: #fafbfc;
+  border: 1px solid #e8ecef;
+  border-radius: 12px;
+}
+
+.section-subtitle {
+  font-size: 13px;
+  color: #7f8c8d;
+  font-style: italic;
+  margin: 4px 0 16px 0;
+  line-height: 1.5;
+}
+
+.radar-chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.radar-chart-wrapper svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---- Radar Legend ---- */
+.radar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.radar-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e0e6ed;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.radar-legend-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.radar-legend-label {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.radar-legend-score {
+  color: #7f8c8d;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ---- Result Actions: butonlar artık daha fazla ---- */
+.result-actions {
+  margin-top: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.result-actions .restart-button,
+.result-actions .export-button {
+  font-size: 14px;
+  padding: 11px 18px;
+  font-weight: 600;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 600px) {
+  .radar-chart-wrapper svg {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .radar-legend {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .radar-legend-item {
+    justify-content: space-between;
+  }
+
+  .result-actions {
+    flex-direction: column;
+  }
+
+  .result-actions .restart-button,
+  .result-actions .export-button {
+    width: 100%;
   }
 }
