@@ -1,49 +1,244 @@
+/* ============================================================================
+   NASA-TLX (Raw TLX) Styling
+   ============================================================================ */
+/* === TÜM HOVER EFEKTLERİNİ KAPAT === */
+.restart-button:hover,
+.export-button:hover:not(:disabled),
+.export-button.export-eeg:hover:not(:disabled),
+.level-row:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  background: inherit !important;
+  color: inherit !important;
+}
 .nasa-container {
-  max-width: 700px;
-  margin: 40px auto;
-  background: white;
-  padding: 40px;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 30px 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8edf3 100%);
+  overflow-y: auto;
 }
 
-.nasa-container h2 {
+.nasa-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  max-width: 800px;
+  width: 100%;
+  padding: 40px;
+}
+
+/* ---------- Header ---------- */
+.nasa-header {
   text-align: center;
-  margin-bottom: 30px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+}
+
+.nasa-header h2 {
+  font-size: 26px;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+  font-weight: 700;
+}
+
+.nasa-difficulty-label {
+  display: inline-block;
+  background: #3498db;
+  color: #ffffff;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 8px 0 16px 0;
+}
+
+.nasa-instructions {
+  color: #7f8c8d;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 8px 0 0 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ---------- Each Scale Item ---------- */
+.nasa-items {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 
 .nasa-item {
-  margin-bottom: 25px;
-}
-
-.nasa-item label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.nasa-item input[type="range"] {
-  width: 100%;
-}
-
-.nasa-item span {
-  display: inline-block;
-  margin-top: 5px;
-  font-weight: 600;
-}
-
-.nasa-container button {
-  margin-top: 30px;
-  width: 100%;
-  padding: 15px;
-  border: none;
+  background: #fafbfc;
+  border: 1px solid #e8ecef;
   border-radius: 12px;
-  font-size: 1.1rem;
+  padding: 20px;
+  transition: border-color 0.2s;
+}
+
+.nasa-item:hover {
+  border-color: #d0d8e0;
+}
+
+.nasa-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.nasa-item-label {
+  font-size: 17px;
   font-weight: 600;
+  color: #2c3e50;
+}
+
+.nasa-item-value {
+  background: #2c3e50;
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  min-width: 40px;
+  text-align: center;
+}
+
+.nasa-item-description {
+  color: #7f8c8d;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 14px 0;
+  font-style: italic;
+}
+
+/* ---------- Slider ---------- */
+.nasa-slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.nasa-anchor {
+  font-size: 12px;
+  color: #95a5a6;
+  font-weight: 500;
+  min-width: 70px;
+  white-space: nowrap;
+}
+
+.nasa-anchor-low {
+  text-align: right;
+}
+
+.nasa-anchor-high {
+  text-align: left;
+}
+
+.nasa-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #ecf0f1 0%, #bdc3c7 100%);
+  outline: none;
   cursor: pointer;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+}
+
+.nasa-slider.touched {
+  background: linear-gradient(to right, #3498db 0%, #2980b9 100%);
+}
+
+.nasa-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid #3498db;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s;
+}
+
+.nasa-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.nasa-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid #3498db;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* ---------- Scale Marks (0, 25, 50, 75, 100) ---------- */
+.nasa-scale-marks {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 82px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #bdc3c7;
+  font-weight: 500;
+}
+
+/* ---------- Submit Button ---------- */
+.nasa-actions {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.nasa-submit-btn {
+  background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+  color: #ffffff;
+  border: none;
+  padding: 14px 48px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  letter-spacing: 0.5px;
+}
+
+.nasa-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(39, 174, 96, 0.3);
+}
+
+.nasa-submit-btn:active {
+  transform: translateY(0);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 600px) {
+  .nasa-card {
+    padding: 24px 16px;
+  }
+
+  .nasa-slider-wrapper {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nasa-anchor {
+    min-width: auto;
+    text-align: center;
+  }
+
+  .nasa-scale-marks {
+    padding: 0;
+  }
 }
