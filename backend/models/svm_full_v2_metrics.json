@@ -1,0 +1,39 @@
+{
+  "model": "SVM (RBF kernel) v2 - Class-Specific Windowing",
+  "training_type": "full_v2",
+  "comparison_with_v1": {
+    "v1": {
+      "training_epochs": 2070,
+      "windowing": "uniform (EPOCH_STEP=500 for all classes)",
+      "accuracy": 0.6029,
+      "f1_macro": 0.5531
+    },
+    "v2": {
+      "training_epochs": 3588,
+      "windowing": "class-specific (EPOCH_STEP=128 for medium, 500 for others)",
+      "accuracy": 0.6311,
+      "f1_macro": 0.5678
+    }
+  },
+  "n_epochs": 3588,
+  "n_features": 436,
+  "n_subjects": 45,
+  "class_distribution": {
+    "low": 966,
+    "medium": 2047,
+    "high": 575
+  },
+  "best_hyperparameters": {
+    "C": 1.0,
+    "gamma": 0.001,
+    "k": 70
+  },
+  "cv_results": {
+    "accuracy_mean": 0.6311,
+    "accuracy_std": 0.0336,
+    "f1_macro_mean": 0.5678,
+    "f1_macro_std": 0.0653,
+    "precision_macro_mean": 0.5695,
+    "recall_macro_mean": 0.5753
+  }
+}

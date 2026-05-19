@@ -638,23 +638,7 @@ class FeatureExtractor:
 def load_stew_data(
     stew_dir: str | Path,
 ) -> tuple[list[np.ndarray], list[int], list[int]]:
-    """
-    STEW (Simultaneous Task EEG Workload) veri setini yükler.
 
-    Yalnızca multitask segmentleri kullanılır (resting state atılır).
-    Etiket normalize: 0=low, 1=medium, 2=high
-
-    Desteklenen formatlar:
-      - sub##_hi/lo.txt : STEW orijinal format (ratings.txt ile etiket)
-      - .npy  : (n_samples, 14) veya (n_samples, 15) [son sütun etiket]
-      - .csv  : son sütun etiket olarak
-      - .mat  : scipy.io.loadmat ile (eeg_data ve labels anahtarları)
-
-    Döner:
-      epochs : list of (128, 14) numpy arrays
-      labels : list of int (0/1/2)
-      groups : list of int  ← katılımcı ID (GroupKFold için)
-    """
     stew_dir = Path(stew_dir)
     if not stew_dir.exists():
         raise FileNotFoundError(f"STEW dizini bulunamadı: {stew_dir}")
@@ -861,24 +845,15 @@ def _rating_to_label(r: int) -> int:
     if r <= 6:
         return 1
     return 2
-
-
 def _load_stew_txt(path: Path, label: int, sub_id: int,
                    epochs: list, labels: list, groups: list) -> None:
     """
     STEW orijinal .txt dosyasını yükler ve epoch'lara böler.
-    Format: N_satır × 14_sütun, boşlukla ayrılmış float.
-    
-    Nguyen et al. §4.1: "The first and last 15 seconds have been removed
-    to eliminate the effects between tasks."
-    15 saniye × 128 Hz = 1920 sample → her iki uçtan kesilir.
-    
-    Pencere: 512 sample, shift 128 (Lim et al. baseline, Nguyen et al. uyumu).
     """
     TRIM_SAMPLES = 15 * FS   # 1920 sample = 15 saniye
 
     try:
-        data = np.loadtxt(path)          # beklenen şekil: (19200, 14)
+        data = np.loadtxt(path)          
         if data.ndim != 2 or data.shape[1] != N_CHANNELS:
             log.warning("Beklenmeyen şekil %s: %s (14 kanal bekleniyor)", path.name, data.shape)
             return
@@ -890,24 +865,31 @@ def _load_stew_txt(path: Path, label: int, sub_id: int,
             log.warning("  %-20s → ATLANDΙ (veri çok kısa, trim sonrası yetersiz)", path.name)
             return
         
-        n_steps = (len(data) - EPOCH_LEN) // EPOCH_STEP + 1
+        # --- EKLENMESİ GEREKEN HESAPLAMA KISMI ---
+        # Medium sınıfı (label == 1) için kaydırma adımını 128 (1 saniye) yap. 
+        # Diğerleri için orijinal EPOCH_STEP değerini (500) kullan.
+        current_step = 128 if label == 1 else EPOCH_STEP
+        
+        n_steps = (len(data) - EPOCH_LEN) // current_step + 1
+        
         if n_steps <= 0:
             log.warning("Yetersiz veri: %s (%d örnekler, en az %d gerekli)", 
                        path.name, len(data), EPOCH_LEN)
             return
         
+        # --- SADECE TEK BİR FOR DÖNGÜSÜ ---
         for i in range(n_steps):
-            start = i * EPOCH_STEP
+            start = i * current_step
             seg = data[start:start + EPOCH_LEN].astype(np.float64)
             if seg.shape == (EPOCH_LEN, N_CHANNELS):
                 epochs.append(seg)
                 labels.append(label)
                 groups.append(sub_id)
+                
         log.info("  %-20s → %3d epoch (trim=±15s), etiket=%d", path.name, n_steps, label)
+        
     except Exception as exc:
         log.warning("TXT yükleme hatası %s: %s", path.name, exc)
-
-
 # ---------------------------------------------------------------------------
 # 4) Ana Pipeline Sınıfı
 # ---------------------------------------------------------------------------
