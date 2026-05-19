@@ -12,12 +12,11 @@ import './NasaTLX.css';
 // - Performans boyutu: TERS SKORLANIR (0=Mükemmel, 100=Başarısız)
 // - Ağırlıklandırma yapılmaz (Raw TLX yaklaşımı)
 // ============================================================================
-
 const scales = [
   {
     key: 'mental',
     label: 'Zihinsel Talep',
-    description: 'Görev ne kadar zihinsel çaba gerektirdi? (düşünme, karar verme, hesaplama, hatırlama)',
+    description: 'Bu görevi tamamlarken ne kadar zihinsel çaba (düşünme, karar verme, hatırlama vb.) harcadınız?',
     lowAnchor: 'Çok Düşük',
     highAnchor: 'Çok Yüksek',
     reversed: false
@@ -25,7 +24,7 @@ const scales = [
   {
     key: 'physical',
     label: 'Fiziksel Talep',
-    description: 'Görev ne kadar fiziksel aktivite gerektirdi? (tuşa basma, hareket)',
+    description: 'Bu görev ne düzeyde fiziksel aktivite (tuşlara basma, fare kullanma vb.) gerektirdi?',
     lowAnchor: 'Çok Düşük',
     highAnchor: 'Çok Yüksek',
     reversed: false
@@ -33,7 +32,7 @@ const scales = [
   {
     key: 'temporal',
     label: 'Zamansal Talep',
-    description: 'Görevin temposu ne kadar baskı yarattı? Zaman baskısı hissettiniz mi?',
+    description: 'Görevi tamamlarken ne kadar zaman baskısı hissettiniz? Görevin temposu nasıldı?',
     lowAnchor: 'Çok Düşük',
     highAnchor: 'Çok Yüksek',
     reversed: false
@@ -41,23 +40,23 @@ const scales = [
   {
     key: 'performance',
     label: 'Performans',
-    description: 'Görevi ne kadar başarılı tamamladığınızı düşünüyorsunuz?',
-    lowAnchor: 'Mükemmel',      // 0 = en iyi
-    highAnchor: 'Başarısız',     // 100 = en kötü
-    reversed: true               // ⚠️ TERS SKORLANIR
+    description: 'Kendinizi bu görevi tamamlarken ne kadar başarılı hissediyorsunuz?',
+    lowAnchor: 'Mükemmel',      
+    highAnchor: 'Başarısız',     
+    reversed: true               
   },
   {
     key: 'effort',
     label: 'Efor',
-    description: 'Performans seviyenize ulaşmak için ne kadar çok çalışmanız gerekti?',
+    description: 'Gerekli performans seviyesine ulaşmak için zihinsel ve fiziksel olarak ne kadar çaba harcadınız?',
     lowAnchor: 'Çok Düşük',
     highAnchor: 'Çok Yüksek',
     reversed: false
   },
   {
     key: 'frustration',
-    label: 'Hayal Kırıklığı / Stres',
-    description: 'Görev sırasında ne kadar tedirgin, stresli, sinirli veya rahatsız hissettiniz?',
+    label: 'Stres ve Rahatsızlık',
+    description: 'Görev sırasında ne kadar stres, baskı, rahatsızlık veya hayal kırıklığı hissettiniz?',
     lowAnchor: 'Çok Düşük',
     highAnchor: 'Çok Yüksek',
     reversed: false
@@ -124,16 +123,15 @@ const NasaTLX = ({ difficulty, onSubmit }) => {
           )}
           <p className="nasa-instructions">
             Tamamladığınız görevle ilgili her boyut için, deneyiminize en uygun
-            noktayı kaydırıcı ile işaretleyin.
+            noktayı işaretleyin.
           </p>
         </div>
-
-        <div className="nasa-items">
+<div className="nasa-items">
           {scales.map(scale => (
             <div key={scale.key} className="nasa-item">
               <div className="nasa-item-header">
                 <span className="nasa-item-label">{scale.label}</span>
-                <span className="nasa-item-value">{values[scale.key]}</span>
+                {/* Köşedeki siyah kutucuk (item-value) BURADAN KALDIRILDI */}
               </div>
 
               <p className="nasa-item-description">{scale.description}</p>
@@ -142,28 +140,33 @@ const NasaTLX = ({ difficulty, onSubmit }) => {
                 <span className="nasa-anchor nasa-anchor-low">
                   {scale.lowAnchor}
                 </span>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="5"
-                  value={values[scale.key]}
-                  onChange={e => handleChange(scale.key, e.target.value)}
-                  className={`nasa-slider ${touched[scale.key] ? 'touched' : ''}`}
-                />
+                
+                <div className="nasa-points-wrapper">
+                  <div className="nasa-points-container">
+                    <div className="nasa-points-line"></div>
+                    {[0, 25, 50, 75, 100].map(val => (
+                      <div
+                        key={val}
+                        className={`nasa-point ${values[scale.key] === val && touched[scale.key] ? 'active' : ''}`}
+                        onClick={() => handleChange(scale.key, val)}
+                      ></div>
+                    ))}
+                  </div>
+                  <div className="nasa-points-labels">
+                    <span>0</span>
+                    <span>25</span>
+                    <span>50</span>
+                    <span>75</span>
+                    <span>100</span>
+                  </div>
+                </div>
+
                 <span className="nasa-anchor nasa-anchor-high">
                   {scale.highAnchor}
                 </span>
               </div>
-
-              {/* Görsel skala ölçeği */}
-              <div className="nasa-scale-marks">
-                <span>0</span>
-                <span>25</span>
-                <span>50</span>
-                <span>75</span>
-                <span>100</span>
-              </div>
+              
+              {/* Eski <div className="nasa-scale-marks"> (0255075100 hatasına sebep olan kısım) BURADAN SİLİNDİ */}
             </div>
           ))}
         </div>

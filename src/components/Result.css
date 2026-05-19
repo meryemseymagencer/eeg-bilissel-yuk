@@ -1,3 +1,8 @@
+/* ============================================================================
+   Result.css — Sınav Sonuç ve İstatistik Sayfası (Tamamen Temizlenmiş Sürüm)
+   ============================================================================ */
+
+/* === ANA YAPI VE KART === */
 .result-container {
   width: 100%;
   max-width: 700px;
@@ -16,29 +21,6 @@
   margin-bottom: 40px;
 }
 
-.grade-circle {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  border: 5px solid;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 20px;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-}
-
-.grade-emoji {
-  font-size: 2.5rem;
-  margin-bottom: 5px;
-}
-
-.grade-letter {
-  font-size: 2rem;
-  font-weight: 700;
-}
-
 .result-title {
   font-size: 2.5rem;
   color: #333;
@@ -50,10 +32,20 @@
 }
 
 .result-subtitle {
-  color: #666;
-  font-size: 1.1rem;
+  font-size: 16px;
+  color: #7f8c8d;
+  margin: 4px 0 2px 0;
+  font-weight: 500;
 }
 
+.result-session-id {
+  font-size: 0.8rem;
+  color: #aaa;
+  margin-top: 6px;
+  font-family: monospace;
+}
+
+/* === GENEL SKOR ÖZETİ === */
 .score-summary {
   margin-bottom: 40px;
 }
@@ -66,32 +58,7 @@
   margin-bottom: 25px;
 }
 
-.main-score .score-value {
-  font-size: 3rem;
-  font-weight: 700;
-  color: #333;
-  margin: 10px 0;
-}
-
-.main-score .score-percentage {
-  font-size: 2rem;
-  font-weight: 700;
-}
-
-.score-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.score-item {
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  text-align: center;
-}
-
-.score-label {
+.main-score .score-label {
   color: #666;
   font-size: 0.95rem;
   font-weight: 600;
@@ -99,55 +66,162 @@
   display: block;
 }
 
-.score-value {
-  font-size: 1.8rem;
+.main-score .score-value {
+  font-size: 3rem;
   font-weight: 700;
   color: #333;
+  margin: 10px 0;
 }
-.result-actions {
+
+/* === SEVİYE BAZLI SONUÇLAR === */
+.breakdown-title {
+  font-size: 1.1rem;
+  color: #555;
+  font-weight: 700;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.level-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1.2fr;
+  align-items: center;
+  padding: 18px 24px;
+  background: #f8f9fa;
+  border-radius: 14px;
+  margin-bottom: 18px;
+}
+
+.level-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.level-stats {
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 12px;
+  align-items: center;
+  font-size: 1rem;
+  gap: 10px;
 }
-.restart-button {
-    padding: 15px 40px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+
+.stat.correct {
+  color: #27ae60;
+  font-weight: 600;
 }
-.restart-button:hover {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+
+.stat.wrong {
+  color: #e74c3c;
+  font-weight: 600;
 }
-/* === SESSION ID === */
-.result-session-id {
-  font-size: 0.8rem;
+
+.divider {
   color: #aaa;
-  margin-top: 6px;
-  font-family: monospace;
 }
+
+.level-nasa {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  font-weight: 600;
+  color: #555;
+  gap: 8px;
+}
+
+.nasa-value {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+/* === NASA-TLX RADAR BÖLÜMÜ === */
+.nasa-radar-section {
+  margin-top: 32px;
+  padding: 24px;
+  background: #fafbfc;
+  border: 1px solid #e8ecef;
+  border-radius: 12px;
+}
+
+.section-subtitle {
+  font-size: 13px;
+  color: #7f8c8d;
+  font-style: italic;
+  margin: 4px 0 16px 0;
+  line-height: 1.5;
+}
+
+.radar-chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.radar-chart-wrapper svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.radar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.radar-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e0e6ed;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.radar-legend-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.radar-legend-label {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.radar-legend-score {
+  color: #7f8c8d;
+  font-size: 12px;
+  font-weight: 500;
+}
+
 /* === EEG BİLİŞSEL YÜK ÖZETİ === */
 .eeg-summary {
   margin: 32px 0;
 }
+
 .eeg-no-data {
   opacity: 0.55;
 }
+
 .eeg-offline-msg {
   text-align: center;
   color: #999;
   font-size: 0.95rem;
   padding: 16px 0;
 }
-/* Baskın yük satırı */
+
 .eeg-dominant {
   display: flex;
   align-items: center;
@@ -177,7 +251,6 @@
   margin-left: auto;
 }
 
-/* Dağılım çubukları */
 .eeg-bars {
   display: flex;
   flex-direction: column;
@@ -219,314 +292,159 @@
   text-align: right;
 }
 
-/* === EXPORT BUTONLARI === */
+/* ====== UEQ-S ÇAĞRI (CTA) BÖLÜMÜ ====== */
+.ueqs-cta-section {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border-left: 4px solid #f59e0b;
+  text-align: center;
+}
 
+.ueqs-cta-button {
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  font-family: inherit;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  display: block;
+}
+
+/* ============================================================================
+   EYLEMLER VE BUTON DÜZENİ (Tüm çakışmalar giderildi)
+   ============================================================================ */
+
+.result-actions {
+  margin-top: 32px;
+}
+
+.result-actions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 4'lü Seçenek Izgarası (2 Yan Yana) */
+.export-buttons-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* YENİDEN BAŞLA BUTONU (Koyu Mor) */
+.restart-button {
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+  transition: none !important; 
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* DIŞA AKTARMA BUTONLARI (Açık Mavi/Mor) */
 .export-button {
-  padding: 15px 28px;
-  background: #f0f4ff;
-  color: #667eea;
-  border: 2px solid #667eea;
+  padding: 14px 20px;
+  background: #f0f4ff !important;       
+  color: #667eea !important;            
+  border: 2px solid #667eea !important; 
   border-radius: 10px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s ease;
-}
-/*
-.export-button:hover:not(:disabled) {
-  background: #667eea;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(102, 126, 234, 0.35);
-}
-*/
-
-.export-button:active:not(:disabled) {
-  transform: translateY(0);
+  text-align: center;
+  width: 100%;
+  transition: none !important; 
+  box-shadow: none !important;
+  transform: none !important;
 }
 
-.export-button.export-eeg {
-  border-color: #27ae60;
-  color: #27ae60;
-  background: #f0faf4;
-}
-/*
-.export-button.export-eeg:hover:not(:disabled) {
-  background: #27ae60;
-  color: white;
-  box-shadow: 0 4px 14px rgba(39, 174, 96, 0.35);
-}
-*/
+/* Pasif (İndirilemez/Tıklanamaz) Durumdaki Butonlar */
 .export-button:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+  border-color: #cbd5e0 !important;
+  color: #a0aec0 !important;
+  background: #f8f9fa !important;
 }
 
-/* === BREAKDOWN BAŞLIĞI === */
-
-.breakdown-title {
-  font-size: 1.1rem;
-  color: #555;
-  font-weight: 700;
-  margin-bottom: 18px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #f0f0f0;
+/* HOVER EFEKTLERİNİ KESİN OLARAK İPTAL EDEN ZORUNLU KOD */
+div.result-actions-container .restart-button:hover,
+div.result-actions-container .restart-button:focus,
+div.result-actions-container .restart-button:active {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+  color: white !important;
+  transform: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  opacity: 1 !important;
 }
 
+div.result-actions-container .export-button:hover,
+div.result-actions-container .export-button:focus,
+div.result-actions-container .export-button:active {
+  background: #f0f4ff !important;
+  color: #667eea !important;
+  border-color: #667eea !important;
+  transform: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+/* === ANİMASYON & RESPONSIVE === */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 600px) {
   .result-card {
     padding: 30px 20px;
   }
-
   .result-title {
     font-size: 2rem;
   }
-
   .main-score .score-value {
     font-size: 2.5rem;
   }
-
-  .main-score .score-percentage {
-    font-size: 1.5rem;
-  }
-
-  .score-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .grade-circle {
-    width: 100px;
-    height: 100px;
-  }
-
-  .grade-emoji {
-    font-size: 2rem;
-  }
-
-  .grade-letter {
-    font-size: 1.5rem;
-  }
-}
-.difficulty-breakdown .score-item {
-  margin-bottom: 20px;
-}
-
-.difficulty-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 5px;
-}
-/* === SEVİYE BAZLI MODERN LAYOUT === */
-
-.level-row {
-  display: grid;
-  grid-template-columns: 1fr 2fr 1.2fr;
-  align-items: center;
-  padding: 18px 24px;
-  background: #f8f9fa;
-  border-radius: 14px;
-  margin-bottom: 18px;
-  transition: all 0.25s ease;
-}
-/*
-.level-row:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-}
-*/
-/* SOL: Seviye adı */
-.level-name {
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: #333;
-}
-
-/* ORTA: Doğru / Yanlış */
-.level-stats {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1rem;
-  gap: 10px;
-}
-
-.stat.correct {
-  color: #27ae60;
-  font-weight: 600;
-}
-
-.stat.wrong {
-  color: #e74c3c;
-  font-weight: 600;
-}
-
-.divider {
-  color: #aaa;
-}
-
-/* SAĞ: NASA */
-.level-nasa {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  font-weight: 600;
-  color: #555;
-  gap: 8px;
-}
-
-.nasa-value {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
   .level-row {
     grid-template-columns: 1fr;
     text-align: center;
     gap: 10px;
   }
-
   .level-nasa {
     justify-content: center;
   }
-}
-/* ============================================================================
-   Result.css — Yeni eklenen bölümler için stiller
-   ----------------------------------------------------------------------------
-   Mevcut Result.css dosyanın SONUNA bu kuralları EKLE.
-   Eski stiller (result-container, result-card, level-row vb.) korunuyor.
-   ============================================================================ */
-
-/* ---- Subtitle (kullanıcı adı) ---- */
-.result-subtitle {
-  font-size: 16px;
-  color: #7f8c8d;
-  margin: 4px 0 2px 0;
-  font-weight: 500;
-}
-
-/* ---- NASA-TLX Radar Section ---- */
-.nasa-radar-section {
-  margin-top: 32px;
-  padding: 24px;
-  background: #fafbfc;
-  border: 1px solid #e8ecef;
-  border-radius: 12px;
-}
-
-.section-subtitle {
-  font-size: 13px;
-  color: #7f8c8d;
-  font-style: italic;
-  margin: 4px 0 16px 0;
-  line-height: 1.5;
-}
-
-.radar-chart-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.radar-chart-wrapper svg {
-  max-width: 100%;
-  height: auto;
-}
-
-/* ---- Radar Legend ---- */
-.radar-legend {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 8px;
-}
-
-.radar-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  background: #ffffff;
-  border-radius: 20px;
-  border: 1px solid #e0e6ed;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.radar-legend-swatch {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border-radius: 3px;
-}
-
-.radar-legend-label {
-  color: #2c3e50;
-  font-weight: 600;
-}
-
-.radar-legend-score {
-  color: #7f8c8d;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-/* ---- Result Actions: butonlar artık daha fazla ---- */
-.result-actions {
-  margin-top: 32px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-}
-
-.result-actions .restart-button,
-.result-actions .export-button {
-  font-size: 14px;
-  padding: 11px 18px;
-  font-weight: 600;
-}
-
-/* ---- Responsive ---- */
-@media (max-width: 600px) {
   .radar-chart-wrapper svg {
     width: 100%;
     max-width: 320px;
   }
-
   .radar-legend {
     flex-direction: column;
     width: 100%;
   }
-
   .radar-legend-item {
     justify-content: space-between;
   }
-
-  .result-actions {
-    flex-direction: column;
-  }
-
-  .result-actions .restart-button,
-  .result-actions .export-button {
-    width: 100%;
+  /* Telefon ekranında 4 seçenek de alt alta geçsin ki taşmasın */
+  .export-buttons-grid {
+    grid-template-columns: 1fr; 
   }
 }

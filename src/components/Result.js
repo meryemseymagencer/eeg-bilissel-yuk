@@ -231,9 +231,11 @@ const Result = ({
   userInfo,
   answers,
   nasaByDifficulty,
+  ueqsData = null,        // ⚡ YENİ
   eegTimeline = [],
   sessionId = null,
   onRestart,
+  onOpenUEQS              // ⚡ YENİ
 }) => {
 
   const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000';
@@ -293,11 +295,14 @@ const Result = ({
   // ---- CSV: Soru cevapları ------------------------------------------------
   const exportAnswersCSV = useCallback(() => {
     const header = [
-      'session_id', 'firstName', 'lastName', 'age', 'gender',
+      'session_id', 'participant_id', 'age', 'gender', 'department', 'education_level',
+      'has_neurological_condition', 'has_eeg_experience', 'has_simulation_experience',
       'questionId', 'difficulty', 'category', 'question',
       'isCorrect', 'points', 'timeUsed_sn',
       'rtlx_score', 'tlx_mental', 'tlx_physical', 'tlx_temporal',
-      'tlx_performance', 'tlx_effort', 'tlx_frustration'
+      'tlx_performance', 'tlx_effort', 'tlx_frustration',
+      // ⚡ UEQ-S sütunları (sadece ilk satırda doluysa anlamlı, her satıra eklenir)
+      'ueqs_pragmatic', 'ueqs_hedonic', 'ueqs_overall'
     ];
 
     const rows = answers.map(a => {
@@ -306,10 +311,14 @@ const Result = ({
 
       return [
         sessionId ?? '',
-        userInfo.firstName,
-        userInfo.lastName,
-        userInfo.age,
-        userInfo.gender,
+        userInfo?.participantId ?? '',
+        userInfo?.age ?? '',
+        userInfo?.gender ?? '',
+        userInfo?.department ?? '',
+        userInfo?.educationLevel ?? '',
+        userInfo?.hasNeurologicalCondition ? 'evet' : 'hayir',
+        userInfo?.hasEEGExperience ? 'evet' : 'hayir',
+        userInfo?.hasSimulationExperience ? 'evet' : 'hayir',
         a.questionId,
         a.difficulty,
         a.category ?? '',
@@ -323,13 +332,17 @@ const Result = ({
         adj.temporal ?? '',
         adj.performance ?? '',
         adj.effort ?? '',
-        adj.frustration ?? ''
+        adj.frustration ?? '',
+        // ⚡ UEQ-S verisi (her satırda aynı değer)
+        ueqsData?.pragmaticScore?.toFixed(2) ?? '',
+        ueqsData?.hedonicScore?.toFixed(2) ?? '',
+        ueqsData?.overallScore?.toFixed(2) ?? ''
       ];
     });
 
     const slug = sessionId ? sessionId.slice(0, 8) : Date.now();
     downloadCSV([header, ...rows], `sinav_sonuclari_${slug}.csv`);
-  }, [answers, userInfo, nasaByDifficulty, sessionId]);
+  }, [answers, userInfo, nasaByDifficulty, ueqsData, sessionId]);
 
   // ---- Backend export'ları -----------------------------------------------
   const exportEEGStew = useCallback(() => {
@@ -360,7 +373,8 @@ const Result = ({
         <div className="result-header">
           <h1 className="result-title">Sınav Tamamlandı</h1>
           <p className="result-subtitle">
-            {userInfo?.firstName} {userInfo?.lastName}
+            Katılımcı: <strong>{userInfo?.participantId || 'Bilinmiyor'}</strong>
+            {userInfo?.department && ` • ${userInfo.department}`}
           </p>
           {sessionId && (
             <p className="result-session-id">Oturum: {sessionId.slice(0, 8)}…</p>
@@ -452,36 +466,63 @@ const Result = ({
             </p>
           </div>
         )}
-
-        {/* EYLEMLER */}
+{/* EYLEMLER */}
         <div className="result-actions">
-          <button className="restart-button" onClick={onRestart}>
-            Yeniden Başla
-          </button>
-          <button className="export-button" onClick={exportAnswersCSV}>
-            Sınav Sonuçları (CSV)
-          </button>
-          <button
-            className="export-button export-eeg"
-            onClick={exportEEGStew}
-            disabled={!sessionId}
-          >
-            EEG Ham Veri (txt)
-          </button>
-          <button
-            className="export-button"
-            onClick={exportFullData}
-            disabled={!sessionId}
-          >
-            Tam Veri (JSON)
-          </button>
-          <button
-            className="export-button"
-            onClick={exportMarkers}
-            disabled={!sessionId}
-          >
-            Markerlar (CSV)
-          </button>
+          
+          {/* ⚡ UEQ-S Geri Bildirim Bölümü */}
+          {!ueqsData && (
+            // Henüz doldurulmamış → Buton göster (Doldurulunca hiçbir şey göstermez)
+            <div className="ueqs-cta-section">
+              <button 
+                className="ueqs-cta-button" 
+                onClick={onOpenUEQS}
+              >
+                Sistem Hakkında Geri Bildirim Ver
+              </button>
+              <p className="ueqs-cta-note">
+                Kullanıcı deneyimi anketi (UEQ-S) - <strong>İsteğe bağlı</strong>, ~2 dakika
+              </p>
+            </div>
+          )}
+
+          {/* YENİ BUTON DÜZENİ */}
+          <div className="result-actions-container">
+            {/* Üstte Koyu Mor Yeniden Başla Butonu */}
+            <button className="restart-button" onClick={onRestart}>
+              Yeniden Başla
+            </button>
+
+            {/* Altta 2x2 İndirme Seçenekleri */}
+            <div className="export-buttons-grid">
+              <button
+                className="export-button export-eeg"
+                onClick={exportEEGStew}
+                disabled={!sessionId}
+              >
+                EEG Ham Veri (txt)
+              </button>
+              <button
+                className="export-button"
+                onClick={exportFullData}
+                disabled={!sessionId}
+              >
+                Tam Veri (JSON)
+              </button>
+              <button
+                className="export-button"
+                onClick={exportMarkers}
+                disabled={!sessionId}
+              >
+                Markerlar (CSV)
+              </button>
+              <button 
+                className="export-button" 
+                onClick={exportAnswersCSV}
+              >
+                Sınav Sonuçları (CSV)
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>

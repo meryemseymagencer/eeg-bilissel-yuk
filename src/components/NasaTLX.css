@@ -1,6 +1,7 @@
 /* ============================================================================
-   NASA-TLX (Raw TLX) Styling
+   NASA-TLX (Raw TLX) Styling - Temizlenmiş & Optimize Edilmiş
    ============================================================================ */
+
 /* === TÜM HOVER EFEKTLERİNİ KAPAT === */
 .restart-button:hover,
 .export-button:hover:not(:disabled),
@@ -11,23 +12,25 @@
   background: inherit !important;
   color: inherit !important;
 }
+
 .nasa-container {
   min-height: 100vh;
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding: 30px 20px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8edf3 100%);
+  background: transparent;
   overflow-y: auto;
 }
 
+/* 1. Dışarıdaki büyük ana beyaz kart - OVAL */
 .nasa-card {
   background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  border-radius: 32px !important; /* Dış kart oval kalacak */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Kartın belirginleşmesi için hafif gölge eklendi */
   max-width: 800px;
   width: 100%;
-  padding: 40px;
+  padding: 32px 40px; 
 }
 
 /* ---------- Header ---------- */
@@ -60,10 +63,8 @@
   color: #7f8c8d;
   font-size: 14px;
   line-height: 1.6;
-  margin: 8px 0 0 0;
+  margin: 8px auto 0 auto;
   max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 /* ---------- Each Scale Item ---------- */
@@ -73,16 +74,13 @@
   gap: 28px;
 }
 
+/* 2. İçerideki Zihinsel Talep, Fiziksel Talep vb. soru kutuları - DÜZ/NORMAL */
 .nasa-item {
   background: #fafbfc;
   border: 1px solid #e8ecef;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 8px !important; /* Ovalleşme iptal edildi, normal hafif köşeli yapıldı */
+  padding: 24px;
   transition: border-color 0.2s;
-}
-
-.nasa-item:hover {
-  border-color: #d0d8e0;
 }
 
 .nasa-item-header {
@@ -98,100 +96,90 @@
   color: #2c3e50;
 }
 
-.nasa-item-value {
-  background: #2c3e50;
-  color: #ffffff;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 700;
-  min-width: 40px;
-  text-align: center;
-}
-
 .nasa-item-description {
-  color: #7f8c8d;
-  font-size: 13px;
+  color: #1a202c; 
+  font-size: 14px; 
   line-height: 1.5;
   margin: 0 0 14px 0;
-  font-style: italic;
+  font-style: normal; 
 }
 
-/* ---------- Slider ---------- */
+/* ---------- 5 Noktalı Seçim Alanı ---------- */
 .nasa-slider-wrapper {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   margin-bottom: 6px;
 }
 
 .nasa-anchor {
   font-size: 12px;
-  color: #95a5a6;
-  font-weight: 500;
+  color: #1a202c;
+  font-weight: 600;
   min-width: 70px;
   white-space: nowrap;
+  margin-top: 12px;
 }
 
-.nasa-anchor-low {
-  text-align: right;
-}
+.nasa-anchor-low { text-align: right; }
+.nasa-anchor-high { text-align: left; }
 
-.nasa-anchor-high {
-  text-align: left;
-}
-
-.nasa-slider {
+.nasa-points-wrapper {
   flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 8px;
-  border-radius: 4px;
-  background: linear-gradient(to right, #ecf0f1 0%, #bdc3c7 100%);
-  outline: none;
-  cursor: pointer;
+  display: flex;
+  flex-direction: column;
 }
 
-.nasa-slider.touched {
-  background: linear-gradient(to right, #3498db 0%, #2980b9 100%);
-}
-
-.nasa-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 3px solid #3498db;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transition: transform 0.1s;
-}
-
-.nasa-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-}
-
-.nasa-slider::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 3px solid #3498db;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-/* ---------- Scale Marks (0, 25, 50, 75, 100) ---------- */
-.nasa-scale-marks {
+.nasa-points-container {
   display: flex;
   justify-content: space-between;
-  padding: 0 82px;
-  margin-top: 4px;
-  font-size: 11px;
-  color: #bdc3c7;
-  font-weight: 500;
+  align-items: center;
+  position: relative;
+  padding: 10px 0;
+}
+
+/* Arkadaki gri çizgi */
+.nasa-points-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: #e2e8f0;
+  transform: translateY(-50%);
+  z-index: 1;
+  border-radius: 3px;
+}
+
+/* Tıklanabilir noktalar */
+.nasa-point {
+  width: 22px;
+  height: 22px;
+  background: #ffffff;
+  border: 3px solid #cbd5e0;
+  border-radius: 50%;
+  z-index: 2;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+/* Seçili nokta stili - Turkuaz/Teal */
+.nasa-point.active {
+  border-color: #20c997 !important; 
+  background: #20c997 !important;   
+  box-shadow: 0 0 0 4px rgba(32, 201, 151, 0.2) !important; 
+}
+
+/* Altındaki sayılar (0, 25, 50, 75, 100) */
+.nasa-points-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #1a202c;
+  font-weight: 700;
+  margin-top: 2px;
+  padding: 0 2px;
 }
 
 /* ---------- Submit Button ---------- */
@@ -213,15 +201,6 @@
   letter-spacing: 0.5px;
 }
 
-.nasa-submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(39, 174, 96, 0.3);
-}
-
-.nasa-submit-btn:active {
-  transform: translateY(0);
-}
-
 /* ---------- Responsive ---------- */
 @media (max-width: 600px) {
   .nasa-card {
@@ -236,9 +215,5 @@
   .nasa-anchor {
     min-width: auto;
     text-align: center;
-  }
-
-  .nasa-scale-marks {
-    padding: 0;
   }
 }
