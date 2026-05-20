@@ -2,11 +2,11 @@
 main.py — FastAPI Backend (v3 - Sinyal İşleme Entegre)
 ============================================================
 Bu versiyondaki değişiklikler:
-  1. ⚡ Bandpass filtre eklendi (1-45 Hz, Butterworth 4. derece)
+  1. Bandpass filtre eklendi (1-45 Hz, Butterworth 4. derece)
      Sebep: Lim et al. (2018) STEW ve Wang et al. (2024) ARFN ile uyumlu
-  2. ⚡ Notch filtre eklendi (50 Hz, Türkiye şebeke gürültüsü)
+  2. Notch filtre eklendi (50 Hz, Türkiye şebeke gürültüsü)
      Sebep: Türkiye'de elektrik 50 Hz; bu olmadan EEG'de büyük bir 50 Hz pik var
-  3. ⚡ Stateful filtering (sosfilt_zi) — gerçek zamanlı akış için
+  3. Stateful filtering (sosfilt_zi) — gerçek zamanlı akış için
      Sebep: Her chunk başında "filter transient" oluşmasını önler
   4. Per-session filter state — her oturum için bağımsız filter durumu
 
@@ -53,17 +53,8 @@ app.add_middleware(
 sessions = {}
 
 # ============================================================================
-# ⚡ ARFN MODELİ YÜKLEME (v3 - Hibrit: Mimari koddan + Ağırlıklar dosyadan)
+# ARFN MODELİ YÜKLEME 
 # ----------------------------------------------------------------------------
-# Bu yöntem TensorFlow versiyon uyumsuzluğunu çözer:
-#   1. Model mimarisini gemini.py'daki build_model() ile oluştur
-#   2. Sadece ağırlıkları (arfn_v2_weights.weights.h5) yükle
-#   3. Sonuç: TF versiyonundan bağımsız, %78.2 doğruluk
-# 
-# Fallback sırası:
-#   1. arfn_v2_weights.weights.h5 + build_model() (YENİ, %78.2)
-#   2. arfn_v2_model.h5 (tam yükleme, TF uyumlu ise %78.2)
-#   3. arfn_model.h5 (ESKİ, %70.1) - güvenli geri dönüş
 # ----------------------------------------------------------------------------
 custom_objects = {'FeatureAttention': FeatureAttention, 'FuzzyLayer': FuzzyLayer}
 model = None
@@ -74,52 +65,12 @@ try:
     models_dir = os.path.join(os.path.dirname(__file__), 'models')
     
     weights_path = os.path.join(models_dir, 'arfn_v2_weights.weights.h5')
-    v2_model_path = os.path.join(models_dir, 'arfn_v2_model.h5')
     v1_model_path = os.path.join(models_dir, 'arfn_model.h5')
-    
-    # YÖNTEM 1: Mimariyi koddan oluştur + sadece ağırlıkları yükle
-    if os.path.exists(weights_path):
-        try:
-            from gemini import build_model
-            print("📦 build_model() ile mimari oluşturuluyor...")
-            model = build_model(initial_centers=None)
-            
-            # Modeli compile et (load_weights için gerekli olabilir)
-            model.compile(
-                optimizer='adam',
-                loss='categorical_crossentropy',
-                metrics=['accuracy']
-            )
-            
-            print(f"📥 Ağırlıklar yükleniyor: {weights_path}")
-            model.load_weights(weights_path)
-            model_version = "ARFN v2 (mimari+ağırlık, Test Acc: %78.2)"
-            print(f"✓ ARFN v2 modeli başarıyla yüklendi! (hibrit yöntem)")
-            print(f"  Model versiyonu: {model_version}")
-        except Exception as e_weights:
-            print(f"⚠️ Hibrit yükleme başarısız: {type(e_weights).__name__}")
-            print(f"   Detay: {str(e_weights)[:200]}")
-            model = None
-    
-    # YÖNTEM 2: Tam model yüklemeyi dene (eğer TF uyumluysa)
-    if model is None and os.path.exists(v2_model_path):
-        try:
-            print(f"📥 Tam v2 modeli yükleniyor: {v2_model_path}")
-            model = tf.keras.models.load_model(v2_model_path, custom_objects=custom_objects)
-            model_version = "ARFN v2 (tam model, Test Acc: %78.2)"
-            print(f"✓ ARFN v2 modeli başarıyla yüklendi! (tam yöntem)")
-            print(f"  Model versiyonu: {model_version}")
-        except Exception as e_v2:
-            print(f"⚠️ Tam v2 yükleme başarısız: {type(e_v2).__name__}")
-            model = None
-    
-    # YÖNTEM 3: Eski v1 modeline geri dön (güvenli yedek)
-    if model is None and os.path.exists(v1_model_path):
-        print(f"📥 Eski v1 modeline geri dönülüyor: {v1_model_path}")
-        model = tf.keras.models.load_model(v1_model_path, custom_objects=custom_objects)
-        model_version = "ARFN v1 (eski, Test Acc: %70.1)"
-        print(f"✓ ARFN v1 modeli yüklendi! (yedek)")
-        print(f"  Model versiyonu: {model_version}")
+    print(f"Eski v1 modeline geri dönülüyor: {v1_model_path}")
+    model = tf.keras.models.load_model(v1_model_path, custom_objects=custom_objects)
+    model_version = "ARFN v1 (eski, Test Acc: %70.1)"
+    print(f"ARFN v1 modeli yüklendi! ✓")
+    print(f"  Model versiyonu: {model_version}")
 except Exception as e:
     print(f"✗ Model yükleme hatası: {e}")
     model = None
