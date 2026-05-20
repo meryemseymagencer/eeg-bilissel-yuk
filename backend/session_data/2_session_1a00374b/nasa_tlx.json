@@ -1,0 +1,69 @@
+{
+  "detailed": {
+    "kolay": {
+      "rtlxScore": 33.33,
+      "rawValues": {
+        "mental": 25,
+        "physical": 25,
+        "temporal": 25,
+        "performance": 25,
+        "effort": 25,
+        "frustration": 25
+      },
+      "adjustedValues": {
+        "mental": 25,
+        "physical": 25,
+        "temporal": 25,
+        "performance": 75,
+        "effort": 25,
+        "frustration": 25
+      },
+      "submitted_at": 1779276547.6580029
+    },
+    "orta": {
+      "rtlxScore": 45.83,
+      "rawValues": {
+        "mental": 50,
+        "physical": 25,
+        "temporal": 50,
+        "performance": 75,
+        "effort": 50,
+        "frustration": 75
+      },
+      "adjustedValues": {
+        "mental": 50,
+        "physical": 25,
+        "temporal": 50,
+        "performance": 25,
+        "effort": 50,
+        "frustration": 75
+      },
+      "submitted_at": 1779276635.2049577
+    },
+    "zor": {
+      "rtlxScore": 37.5,
+      "rawValues": {
+        "mental": 25,
+        "physical": 50,
+        "temporal": 50,
+        "performance": 50,
+        "effort": 25,
+        "frustration": 25
+      },
+      "adjustedValues": {
+        "mental": 25,
+        "physical": 50,
+        "temporal": 50,
+        "performance": 50,
+        "effort": 25,
+        "frustration": 25
+      },
+      "submitted_at": 1779277101.877953
+    }
+  },
+  "legacy_format": {
+    "kolay": "33.3",
+    "orta": "45.8",
+    "zor": "37.5"
+  }
+}

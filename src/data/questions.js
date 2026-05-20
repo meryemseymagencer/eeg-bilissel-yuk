@@ -101,21 +101,23 @@ export const questions = {
     },
 
     // ── Bellek — Düşük ────────────────────────────────────────────────────────
-    {
+ {
       id: 11,
-      question: 'Az önce gösterilen harf <strong>K</strong> miydi?',
-      stimType: 'simple',
-      stimDur: 2000,
-      stimMain: 'K',
-      taskHint: 'Çıkan harfi aklınızda tutun.',
-      taskReminder: 'Görev: Çıkan harfi hatırlayın',
+      question: 'Az önce gösterilen harfler arasında <strong>K</strong> var mıydı?', // Gramer düzeltildi: var mıydı
+      stimType: 'sequence',              // ⚡ 'simple' yerine 'sequence' yaptık, böylece sırayla dönecek
+      stimDur: 4000,                     // ⚡ Toplam süre (Her harf için 1500ms + aradaki boşluklar için artırıldı)
+      stimItemDur: 1500,                 // Protokolündeki Owen vd. standardı: Her harf ekranda 1.5 sn kalır
+      stimItemGap: 300,                  // Harfler arası 300ms ekran boş kalır (ISI)
+      retentionDur: 1500,                // Harfler bitince soru gelmeden önce 1.5 sn bekleme süresi
+      taskHint: 'Çıkan harfleri sırayla aklınızda tutun.',
+      taskReminder: 'Görev: Çıkan harfleri hatırlayın',
+      items: ['K', 'M'],                 // ⚡ Harfleri diziye ayırdık. Önce K, sonra M tek tek ekrana gelecek
       options: ['Evet', 'Hayır'],
       correctAnswer: 0,
       points: 10,
       category: 'B',
       difficulty: 'kolay'
     },
-
     {
       id: 13,
       question: 'Az önce gösterilen sayı <strong>7</strong> miydi?',
@@ -315,7 +317,7 @@ export const questions = {
       id: 29,
       question: '<strong>P</strong> harfi listede var mıydı?',
       stimType: 'sternberg',
-      stimDur: 15000,
+      stimDur: 9000,
       taskHint: 'Çıkan harfleri sırayla ezberleyin.',
       taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
       encItems: ['M', 'X', 'P', 'L', 'K'],
@@ -336,61 +338,6 @@ export const questions = {
   zor: [
 
     // ── Uzamsal ──────────────────────────────────────────────────────────────
-    {
-      id: 8,
-      question: `Aşağıdaki <strong>3×3 matristeki</strong> mor kareler iki bağımsız kurala göre değişiyor:<br>
-        <strong>Kural 1:</strong> Her <em>sütunda</em> kare boyutu <em>küçük → orta → büyük</em> olarak artar.<br>
-        <strong>Kural 2:</strong> Mor kare her <em>satırda</em> saat yönünde kayar (sol üst → sağ üst → sağ alt).<br>
-        <strong>"?" yerine hangisi gelmelidir?</strong>`,
-      gorsel: {
-        tip: 'html',
-        icerik: `
-          <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;justify-content:center;">
-            <div>
-              <div class="matrix-grid">
-                ${[
-                  { size: 'small', corner: 'tl' }, { size: 'small', corner: 'tr' }, { size: 'small', corner: 'br' },
-                  { size: 'medium', corner: 'tl' }, { size: 'medium', corner: 'tr' }, { size: 'medium', corner: 'br' },
-                  { size: 'large', corner: 'tl' }, { size: 'large', corner: 'tr' }, null
-                ].map((cell, i) => {
-                  if (cell === null) return `<div class="matrix-cell question-cell">?</div>`;
-                  const s = { small: 16, medium: 24, large: 32 }[cell.size];
-                  const offsets = { tl: [4,4], tr: [50-s-4,4], br: [50-s-4,50-s-4], bl: [4,50-s-4] };
-                  const [ox, oy] = offsets[cell.corner];
-                  return `<div class="matrix-cell"><svg width="50" height="50" viewBox="0 0 50 50"><rect x="${ox}" y="${oy}" width="${s}" height="${s}" fill="#7c4dff"/></svg></div>`;
-                }).join('')}
-              </div>
-            </div>
-            <div class="options-grid-visual">
-              ${[
-                { label: 'A', size: 'large', corner: 'bl' },
-                { label: 'B', size: 'medium', corner: 'br' },
-                { label: 'C', size: 'large', corner: 'br' },
-                { label: 'D', size: 'large', corner: 'tr' }
-              ].map(opt => {
-                const s = { small: 16, medium: 24, large: 32 }[opt.size];
-                const offsets = { tl: [4,4], tr: [50-s-4,4], br: [50-s-4,50-s-4], bl: [4,50-s-4] };
-                const [ox, oy] = offsets[opt.corner];
-                return `
-                  <div class="visual-option" data-harf="${opt.label}">
-                    <span class="visual-label">${opt.label}</span>
-                    <svg width="50" height="50" viewBox="0 0 50 50">
-                      <rect x="0" y="0" width="50" height="50" fill="none" stroke="#555" stroke-width="1"/>
-                      <rect x="${ox}" y="${oy}" width="${s}" height="${s}" fill="#7c4dff"/>
-                    </svg>
-                  </div>`;
-              }).join('')}
-            </div>
-          </div>`
-      },
-      gorselSecenekler: true,
-      options: ['Seçenek A', 'Seçenek B', 'Seçenek C', 'Seçenek D'],
-      correctAnswer: 2,
-      points: 30,
-      category: 'U',
-      difficulty: 'zor'
-    },
-
     {
       id: 9,
       question: '<strong>3×3×3 boyutundaki bir büyük küp</strong>, her yüzeyi farklı renkte boyanmıştır (6 yüz = 6 farklı renk). Küp <strong>1×1×1\'lik küçük parçalara</strong> ayrılıyor. Tam olarak <strong>3 farklı renkle boyalı</strong> kaç küçük küp vardır?',
@@ -432,51 +379,123 @@ export const questions = {
         tip: 'html',
         icerik: `
           <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
-            <div class="visual-row" style="gap:20px;">
-              ${[
-                { step: 1, circleRow: 4, lines: 1 },
-                { step: 2, circleRow: 3, lines: 2 },
-                { step: 3, circleRow: 2, lines: 3 }
-              ].map(s => `
-                <div class="visual-box">
-                  <span class="visual-label">Adım ${s.step}</span>
-                  <svg width="56" height="110" viewBox="0 0 56 110">
-                    ${[0,1,2,3,4].map(r =>
-                      `<rect x="8" y="${5+r*20}" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>`
-                    ).join('')}
-                    <circle cx="28" cy="${5+s.circleRow*20+9}" r="7" fill="#6c63ff"/>
-                    ${Array.from({length: s.lines}, (_, i) =>
-                      `<line x1="8" y1="${108-i*6}" x2="48" y2="${108-i*6}" stroke="#aaa" stroke-width="1.5"/>`
-                    ).join('')}
-                  </svg>
-                </div>
-              `).join('<span style="align-self:center;font-size:1.2rem;">→</span>')}
-              <span style="align-self:center;font-size:1.2rem;">→</span>
+            <div class="visual-row" style="gap:20px;justify-content:center;">
+              <!-- Adım 1 -->
+              <div class="visual-box">
+                <span class="visual-label">Adım 1</span>
+                <svg width="56" height="110" viewBox="0 0 56 110">
+                  <rect x="8" y="5" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="25" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="45" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="65" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="85" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <circle cx="28" cy="94" r="7" fill="#6c63ff"/>
+                  <line x1="8" y1="102" x2="48" y2="102" stroke="#aaa" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <span style="font-size:1.2rem;align-self:center;">→</span>
+              <!-- Adım 2 -->
+              <div class="visual-box">
+                <span class="visual-label">Adım 2</span>
+                <svg width="56" height="110" viewBox="0 0 56 110">
+                  <rect x="8" y="5" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="25" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="45" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="65" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="85" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <circle cx="28" cy="74" r="7" fill="#6c63ff"/>
+                  <line x1="8" y1="102" x2="48" y2="102" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="96" x2="48" y2="96" stroke="#aaa" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <span style="font-size:1.2rem;align-self:center;">→</span>
+              <!-- Adım 3 -->
+              <div class="visual-box">
+                <span class="visual-label">Adım 3</span>
+                <svg width="56" height="110" viewBox="0 0 56 110">
+                  <rect x="8" y="5" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="25" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="45" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="65" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="85" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <circle cx="28" cy="54" r="7" fill="#6c63ff"/>
+                  <line x1="8" y1="102" x2="48" y2="102" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="96" x2="48" y2="96" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="90" x2="48" y2="90" stroke="#aaa" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <span style="font-size:1.2rem;align-self:center;">→</span>
               <div class="visual-box">
                 <span class="visual-label">Adım 4 = ?</span>
                 <div class="question-mark-box">?</div>
               </div>
             </div>
             <div class="options-grid-visual">
-              ${[
-                { label: 'A', circleRow: 0, lines: 4 },
-                { label: 'B', circleRow: 1, lines: 4 },
-                { label: 'C', circleRow: 4, lines: 4 },
-                { label: 'D', circleRow: 1, lines: 5 }
-              ].map(opt => `
-                <div class="visual-option" data-harf="${opt.label}">
-                  <span class="visual-label">${opt.label}</span>
-                  <svg width="56" height="110" viewBox="0 0 56 110">
-                    ${[0,1,2,3,4].map(r =>
-                      `<rect x="8" y="${5+r*20}" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>`
-                    ).join('')}
-                    <circle cx="28" cy="${5+opt.circleRow*20+9}" r="7" fill="#6c63ff"/>
-                    ${Array.from({length: opt.lines}, (_, i) =>
-                      `<line x1="8" y1="${108-i*6}" x2="48" y2="${108-i*6}" stroke="#aaa" stroke-width="1.5"/>`
-                    ).join('')}
-                  </svg>
-                </div>`
-              ).join('')}
+              <!-- Seçenek A: Daire üst kısımda (satır 1), 4 çizgi -->
+              <div class="visual-option" data-harf="A">
+                <span class="visual-label">A</span>
+                <svg width="56" height="110" viewBox="0 0 56 110">
+                  <rect x="8" y="5" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="25" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="45" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="65" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="85" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <circle cx="28" cy="14" r="7" fill="#6c63ff"/>
+                  <line x1="8" y1="102" x2="48" y2="102" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="96" x2="48" y2="96" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="90" x2="48" y2="90" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="84" x2="48" y2="84" stroke="#aaa" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <!-- Seçenek B: Daire satır 2, 4 çizgi (DOĞRU) -->
+              <div class="visual-option" data-harf="B">
+                <span class="visual-label">B</span>
+                <svg width="56" height="110" viewBox="0 0 56 110">
+                  <rect x="8" y="5" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="25" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="45" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="65" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="85" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <circle cx="28" cy="34" r="7" fill="#6c63ff"/>
+                  <line x1="8" y1="102" x2="48" y2="102" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="96" x2="48" y2="96" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="90" x2="48" y2="90" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="84" x2="48" y2="84" stroke="#aaa" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <!-- Seçenek C: Daire satır 5 (geriye gitti), 4 çizgi -->
+              <div class="visual-option" data-harf="C">
+                <span class="visual-label">C</span>
+                <svg width="56" height="110" viewBox="0 0 56 110">
+                  <rect x="8" y="5" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="25" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="45" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="65" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="85" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <circle cx="28" cy="94" r="7" fill="#6c63ff"/>
+                  <line x1="8" y1="102" x2="48" y2="102" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="96" x2="48" y2="96" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="90" x2="48" y2="90" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="84" x2="48" y2="84" stroke="#aaa" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <!-- Seçenek D: Daire satır 2, 5 çizgi (çok fazla) -->
+              <div class="visual-option" data-harf="D">
+                <span class="visual-label">D</span>
+                <svg width="56" height="110" viewBox="0 0 56 110">
+                  <rect x="8" y="5" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="25" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="45" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="65" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <rect x="8" y="85" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
+                  <circle cx="28" cy="34" r="7" fill="#6c63ff"/>
+                  <line x1="8" y1="102" x2="48" y2="102" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="96" x2="48" y2="96" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="90" x2="48" y2="90" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="84" x2="48" y2="84" stroke="#aaa" stroke-width="1.5"/>
+                  <line x1="8" y1="78" x2="48" y2="78" stroke="#aaa" stroke-width="1.5"/>
+                </svg>
+              </div>
             </div>
           </div>`
       },
@@ -498,7 +517,7 @@ export const questions = {
       stimItemGap: 300,                 // ⚡ ISI
       retentionDur: 2000,
       n_val: 3,
-      taskReminder: 'Görev: 3-back eşleşmelerini (3 adım önceki ile aynı harf) zihinde sayın',
+      taskReminder: 'Görev: 3 adım önceki ile aynı harfi zihinde sayın',
       // 3-back analiz: B(0), K(1), T(2), M(3), K(4), T(5)
       //   M(3) vs B(0): farklı
       //   K(4) vs K(1): EVET ✓
@@ -516,7 +535,7 @@ export const questions = {
       id: 32,
       question: '"<strong>M</strong>" harfi listede var mıydı?',
       stimType: 'sternberg',
-      stimDur: 25000,
+      stimDur: 9000,
       taskHint: 'Çıkan harfleri sırayla ezberleyin.',
       taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
       encItems: ['G', 'R', 'T', 'B', 'N', 'S'],
@@ -558,7 +577,7 @@ export const questions = {
       id: 36,
       question: '"<strong>Y</strong>" harfi listede var mıydı?',
       stimType: 'sternberg',
-      stimDur: 35000,
+      stimDur: 9000,
       taskHint: 'Çıkan harfleri sırayla ezberleyin.',
       taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
       encItems: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U'],

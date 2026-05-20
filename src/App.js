@@ -5,15 +5,14 @@ import Exam from './components/Exam';
 import Result from './components/Result';
 import NasaTLX from './components/NasaTLX';
 import UEQS from './components/UEQS';
-import CalibrationScreen from './components/CalibrationScreen';
 import useSession from './hooks/useSession';
 import useEEGStream from './hooks/useEEGStream';
 import './App.css';
 
 function App() {
-  // Akış: consent → form → calibration → exam → nasa → result
-  //                                                      ↓ (opsiyonel)
-  //                                                     ueqs → result (UEQ-S doldurulmuş)
+  // Akış: consent → form → exam → nasa → result
+  //                                 ↓ (opsiyonel)
+  //                                ueqs → result (UEQ-S doldurulmuş)
   const [step, setStep] = useState('consent');
   
   const [consentInfo, setConsentInfo] = useState(null);
@@ -33,34 +32,21 @@ function App() {
   const {
     sessionId,
     backendOnline,
-    finalizeStatus,        // ⚡ YENİ
+    finalizeStatus,        
     createSession,
-    finalizeSession,       // ⚡ YENİ
+    finalizeSession,     
     syncAnswers,
     syncNasa,
     syncNasaDetailed,
     syncMarker,
-    syncUeqs,              // ⚡ YENİ
+    syncUeqs,              
     reset: resetSession
   } = useSession();
 
   // ⚡ sessionId olmadan WebSocket bağlanma — 403 hatasını önler
-  const eegActive = !!sessionId && (step === 'calibration' || step === 'exam' || step === 'nasa');
+  const eegActive = !!sessionId && (step === 'exam' || step === 'nasa');
 
   const { cognitiveLoad, timeline, connected: eegConnected, appState } = useEEGStream(sessionId, eegActive);
-
-  useEffect(() => {
-    if (step === 'calibration' && appState === 'testing') {
-      syncMarker('calibration_end', performance.now(), {});
-      setStep('exam');
-    }
-  }, [step, appState, syncMarker]);
-
-  useEffect(() => {
-    if (step === 'calibration' && sessionId) {
-      syncMarker('calibration_start', performance.now(), {});
-    }
-  }, [step, sessionId, syncMarker]);
 
   useEffect(() => {
     if (step === 'nasa' && currentDifficulty) {
@@ -125,17 +111,9 @@ function App() {
             setUserInfo(fullUserInfo);
             setDifficultyIndex(0);
             setCurrentDifficulty(null);
-            setStep('calibration');
+            setStep('exam');
             createSession(fullUserInfo);
           }}
-        />
-      )}
-
-      {/* 3. ADIM — Kalibrasyon */}
-      {step === 'calibration' && (
-        <CalibrationScreen
-          appState={appState}
-          onCalibrationComplete={() => setStep('exam')}
         />
       )}
 
