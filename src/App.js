@@ -44,7 +44,8 @@ function App() {
     reset: resetSession
   } = useSession();
 
-  const eegActive = step === 'calibration' || step === 'exam' || step === 'nasa';
+  // ⚡ sessionId olmadan WebSocket bağlanma — 403 hatasını önler
+  const eegActive = !!sessionId && (step === 'calibration' || step === 'exam' || step === 'nasa');
 
   const { cognitiveLoad, timeline, connected: eegConnected, appState } = useEEGStream(sessionId, eegActive);
 
@@ -97,6 +98,9 @@ function App() {
     resetSession();
   };
 
+  // Test modu kontrolü
+  const isTestMode = true; // Test modunda true, normalde false
+
   return (
     <div className="App">
 
@@ -131,11 +135,19 @@ function App() {
       )}
 
       {/* 3. ADIM — Kalibrasyon */}
-      {step === 'calibration' && (
+      {step === 'calibration' && !isTestMode && (
         <CalibrationScreen
           appState={appState}
           onCalibrationComplete={() => setStep('exam')}
         />
+      )}
+
+      {step === 'calibration' && isTestMode && (
+        (() => {
+          console.log('[Test Modu] Kalibrasyon atlandı.');
+          setStep('exam');
+          return null;
+        })()
       )}
 
       {/* 4. ADIM — Sınav */}

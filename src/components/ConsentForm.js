@@ -132,7 +132,7 @@ const ConsentForm = ({ onAccept, onDecline }) => {
               disabled={!accepted}
               className={`consent-button consent-button-accept ${!accepted ? 'disabled' : ''}`}
             >
-              Devam Et →
+              Devam Et
             </button>
           </div>
         </div>

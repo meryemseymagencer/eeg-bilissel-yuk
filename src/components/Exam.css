@@ -374,3 +374,327 @@
 .option-button.selected:disabled {
   opacity: 1;  /* Seçilen şık tam görünür kalsın */
 }
+
+/* ============================================================================
+   Exam.css — Stimulus Phase + Visual Question Styles
+   v3.0 entegrasyonu: uzamsal + bellek soruları
+   ============================================================================ */
+
+/* ---- Stimulus Kartı ---- */
+.stimulus-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 48px 40px;
+  text-align: center;
+  min-height: 320px;
+  justify-content: center;
+}
+
+.stimulus-reminder {
+  font-size: 0.9rem;
+  color: #555;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px 20px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.stimulus-main {
+  font-size: clamp(48px, 10vw, 80px);
+  font-weight: 700;
+  line-height: 1.1;
+  color: #333;
+  text-align: center;
+  min-width: 80px;
+}
+
+.stimulus-progress-hint {
+  font-size: 0.78rem;
+  color: #aaa;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+/* ---- Sequence / N-back ---- */
+.stimulus-sequence {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.stim-item-counter {
+  font-size: 0.85rem;
+  color: #888;
+  font-variant-numeric: tabular-nums;
+}
+
+.stim-seq-track {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stim-seq-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 2px solid #e0e0e0;
+  transition: all 0.2s ease;
+}
+
+.stim-seq-dot.past {
+  background: #f0f0f0;
+  color: #999;
+  border-color: #e0e0e0;
+}
+
+.stim-seq-dot.current {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-color: #667eea;
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.stim-seq-dot.future {
+  background: transparent;
+  color: #ccc;
+  border-color: #e8e8e8;
+  border-style: dashed;
+}
+
+/* ---- Sternberg Kodlama ---- */
+.stimulus-sternberg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.stim-enc-label {
+  font-size: 0.85rem;
+  color: #666;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.stim-enc-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stim-enc-cell {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 28px;
+  font-weight: 700;
+  border: 2px solid #e0e0e0;
+  transition: all 0.25s ease;
+}
+
+.stim-enc-cell.revealed {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-color: #667eea;
+  animation: encPopIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.stim-enc-cell.hidden {
+  background: #f8f9fa;
+  color: #bbb;
+  font-size: 20px;
+}
+
+@keyframes encPopIn {
+  from { transform: scale(0.7); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.stim-enc-count {
+  font-size: 0.8rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* ---- Probe gösterimi (Sternberg soru fazı) ---- */
+.probe-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0 10px;
+  padding: 24px;
+  background: #f8f9fa;
+  border-radius: 16px;
+  border: 2px solid #e0e0e0;
+}
+
+.probe-letter {
+  font-size: 4rem;
+  font-weight: 700;
+  color: #333;
+  line-height: 1;
+}
+
+.probe-label {
+  font-size: 0.95rem;
+  color: #666;
+}
+
+/* ---- Zorluk rozeti kategori etiketi ---- */
+.badge-category {
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.85;
+  margin-left: 2px;
+}
+
+/* ============================================================================
+   Görsel Soru Stilleri (bitirme/public/style.css'den uyarlandı)
+   gorsel.icerik HTML içeriği için — dangerouslySetInnerHTML
+   ============================================================================ */
+
+.visual-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.visual-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.visual-label {
+  font-size: 0.75rem;
+  color: #888;
+  text-align: center;
+}
+
+.visual-arrow {
+  color: #aaa;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.question-mark-box {
+  width: 60px;
+  height: 60px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: #aaa;
+}
+
+.folding-steps {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 60px);
+  grid-template-rows: repeat(3, 60px);
+  gap: 4px;
+}
+
+.matrix-cell {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.matrix-cell.question-cell {
+  border: 2px dashed #667eea;
+  font-size: 1.5rem;
+  color: #aaa;
+}
+
+/* Görsel seçenek grid (gorselSecenekler sorular) */
+.options-grid-visual {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.visual-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #fff;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.visual-option:hover {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.visual-option.selected {
+  border-color: #667eea;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.visual-option.disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .stimulus-card {
+    padding: 32px 20px;
+  }
+
+  .stim-enc-cell {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+
+  .probe-letter {
+    font-size: 3rem;
+  }
+
+  .matrix-grid {
+    grid-template-columns: repeat(3, 50px);
+    grid-template-rows: repeat(3, 50px);
+  }
+}

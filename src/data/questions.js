@@ -1,448 +1,632 @@
 // ============================================================================
-// Bilişsel Yük Odaklı Soru Veritabanı (v2.0)
-// EEG + NASA-TLX Çalışması için Derecelendirilmiş Set
+// Bilişsel Yük Odaklı Soru Veritabanı — Uzamsal + Bellek
+// EEG + NASA-TLX Çalışması | Kocaeli Üniversitesi
+// Etik Kurul Onaylı Protokol
 // ----------------------------------------------------------------------------
-// Kategoriler:
-//   A - Aritmetik İşlem (basamak/işlem sayısı ile derecelendirilir)
-//   B - Kategorik Karar (çeldirici yakınlığı ile derecelendirilir)
-//   C - Cebirsel Akıl Yürütme (değişken/işlem sayısı ile derecelendirilir)
-//   D - Çalışma Belleği (item sayısı + manipülasyon ile derecelendirilir)
+// Kategori U : Uzamsal-Görsel (zihinsel döndürme, katlama, örüntü)
+// Kategori B : Bellek (Basit tanıma, Sternberg, N-back, Sıra hatırlama)
 //
-// Her zorluk seviyesinde: 4 kategori × 3 soru = 12 soru
+// Tüm cevaplar buton tıklaması ile verilir — klavye etkileşimi yok (EEG)
 // ============================================================================
 
 export const questions = {
+
   // ==========================================================================
-  // KOLAY SEVİYE — Düşük bilişsel yük (baseline'a yakın)
-  // Hedef: Otomatik işlem, minimal çalışma belleği yükü
+  // KOLAY — Düşük bilişsel yük
   // ==========================================================================
   kolay: [
-    // --- Kategori A: Tek basamaklı aritmetik ---
+
+    // ── Uzamsal ──────────────────────────────────────────────────────────────
     {
       id: 1,
-      question: "6 + 3 = ?",
-      options: ["7", "8", "9", "10"],
-      correctAnswer: 2,
+      question: 'Aşağıdaki L şekli saat yönünde 90°döndürüldüğünde şeklin <em>üst kenarı</em> hangi yöne gelir?',
+      gorsel: {
+        tip: 'html',
+        icerik: `
+          <div class="visual-row">
+            <div class="visual-box">
+              <svg width="80" height="80" viewBox="0 0 80 80">
+                <rect x="10" y="10" width="20" height="60" fill="#6c63ff"/>
+                <rect x="10" y="50" width="60" height="20" fill="#6c63ff"/>
+              </svg>
+            </div>
+            <div class="visual-arrow">→ <span style="font-size:0.8rem">90° saat yönünde</span></div>
+            <div class="visual-box">
+              <div class="question-mark-box">?</div>
+            </div>
+          </div>`
+      },
+      options: ['Sola', 'Sağa', 'Yukarı', 'Aşağı'],
+      correctAnswer: 1,
       points: 10,
-      category: "A",
-      difficulty: "kolay"
+      category: 'U',
+      difficulty: 'kolay'
     },
+
     {
       id: 2,
-      question: "9 + 4 = ?",
-      options: ["11", "12", "13", "14"],
-      correctAnswer: 2,
-      points: 10,
-      category: "A",
-      difficulty: "kolay"
-    },
-    {
-      id: 3,
-      question: "8 − 5 = ?",
-      options: ["2", "3", "4", "5"],
+      question: 'Kare bir kağıdı tam ortadan yatay olarak kesiyorsun. Elde edilen iki parçanın her biri hangi tür dörtgendir?',
+      gorsel: {
+        tip: 'html',
+        icerik: `
+          <div class="visual-row">
+            <div class="visual-box">
+              <span class="visual-label">Orijinal</span>
+              <svg width="80" height="80" viewBox="0 0 80 80">
+                <rect x="5" y="5" width="70" height="70" fill="none" stroke="#6c63ff" stroke-width="3"/>
+                <line x1="5" y1="40" x2="75" y2="40" stroke="#ff6584" stroke-width="2" stroke-dasharray="6,3"/>
+              </svg>
+            </div>
+            <div class="visual-arrow">→ kesilir</div>
+            <div class="visual-box">
+              <svg width="80" height="80" viewBox="0 0 80 80">
+                <rect x="5" y="5" width="70" height="30" fill="none" stroke="#6c63ff" stroke-width="3"/>
+                <text x="40" y="26" text-anchor="middle" fill="#999" font-size="14">?</text>
+                <rect x="5" y="45" width="70" height="30" fill="none" stroke="#6c63ff" stroke-width="3"/>
+                <text x="40" y="66" text-anchor="middle" fill="#999" font-size="14">?</text>
+              </svg>
+            </div>
+          </div>`
+      },
+      options: ['Kare', 'Dikdörtgen', 'Eşkenar dörtgen', 'Yamuk'],
       correctAnswer: 1,
       points: 10,
-      category: "A",
-      difficulty: "kolay"
+      category: 'U',
+      difficulty: 'kolay'
     },
 
-    // --- Kategori B: Uzak çeldirici (anlamsal mesafe yüksek) ---
     {
       id: 4,
-      question: "Kalem – Defter – Kitap – Muz\nHangisi farklıdır?",
-      options: ["Kalem", "Defter", "Kitap", "Muz"],
-      correctAnswer: 3,
+      question: '3×3 kare ızgarada sol üst köşeden sağ alt köşeye çekilen köşegen üzerinden geçtiği karelerin sayısı açtır?',
+      gorsel: {
+        tip: 'html',
+        icerik: `
+          <div class="visual-row" style="justify-content:center;">
+            <div class="visual-box">
+              <span class="visual-label">3×3 Izgara</span>
+              <svg width="90" height="90" viewBox="0 0 90 90">
+                ${[0,1,2].map(r => [0,1,2].map(c =>
+                  `<rect x="${5+c*27}" y="${5+r*27}" width="25" height="25" fill="${(r===c)?'rgba(108,99,255,0.25)':'none'}" stroke="#555" stroke-width="1.5"/>`
+                ).join('')).join('')}
+                <line x1="5" y1="5" x2="83" y2="83" stroke="#ff6584" stroke-width="2.5"/>
+              </svg>
+            </div>
+          </div>`
+      },
+      options: ['2', '3', '4', '5'],
+      correctAnswer: 1,
       points: 10,
-      category: "B",
-      difficulty: "kolay"
-    },
-    {
-      id: 5,
-      question: "Elma – Armut – Çilek – Masa\nHangisi farklıdır?",
-      options: ["Elma", "Armut", "Çilek", "Masa"],
-      correctAnswer: 3,
-      points: 10,
-      category: "B",
-      difficulty: "kolay"
-    },
-    {
-      id: 6,
-      question: "Köpek – Kedi – Tavşan – Araba\nHangisi farklıdır?",
-      options: ["Köpek", "Kedi", "Tavşan", "Araba"],
-      correctAnswer: 3,
-      points: 10,
-      category: "B",
-      difficulty: "kolay"
+      category: 'U',
+      difficulty: 'kolay'
     },
 
-    // --- Kategori C: Tek adımlı cebir ---
-    {
-      id: 7,
-      question: "X + 3 = 7 ise X = ?",
-      options: ["2", "3", "4", "5"],
-      correctAnswer: 2,
-      points: 10,
-      category: "C",
-      difficulty: "kolay"
-    },
-    {
-      id: 8,
-      question: "X − 2 = 5 ise X = ?",
-      options: ["5", "6", "7", "8"],
-      correctAnswer: 2,
-      points: 10,
-      category: "C",
-      difficulty: "kolay"
-    },
-    {
-      id: 9,
-      question: "2X = 8 ise X = ?",
-      options: ["2", "3", "4", "5"],
-      correctAnswer: 2,
-      points: 10,
-      category: "C",
-      difficulty: "kolay"
-    },
-
-    // --- Kategori D: 3 item forward span (sıralı hatırlama) ---
-    {
-      id: 10,
-      question: "Sayılar: 4 – 7 – 2\nAynı sırayla seçiniz.",
-      options: ["4 – 7 – 2", "2 – 7 – 4", "7 – 4 – 2", "4 – 2 – 7"],
-      correctAnswer: 0,
-      points: 10,
-      category: "D",
-      difficulty: "kolay"
-    },
+    // ── Bellek — Düşük ────────────────────────────────────────────────────────
     {
       id: 11,
-      question: "Sayılar: 5 – 1 – 8\nAynı sırayla seçiniz.",
-      options: ["1 – 5 – 8", "5 – 1 – 8", "8 – 1 – 5", "5 – 8 – 1"],
-      correctAnswer: 1,
+      question: 'Az önce gösterilen harf <strong>K</strong> miydi?',
+      stimType: 'simple',
+      stimDur: 2000,
+      stimMain: 'K',
+      taskHint: 'Çıkan harfi aklınızda tutun.',
+      taskReminder: 'Görev: Çıkan harfi hatırlayın',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 0,
       points: 10,
-      category: "D",
-      difficulty: "kolay"
+      category: 'B',
+      difficulty: 'kolay'
     },
-    {
-      id: 12,
-      question: "Sayılar: 3 – 9 – 6\nAynı sırayla seçiniz.",
-      options: ["6 – 9 – 3", "3 – 6 – 9", "3 – 9 – 6", "9 – 3 – 6"],
-      correctAnswer: 2,
-      points: 10,
-      category: "D",
-      difficulty: "kolay"
-    }
-  ],
 
-  // ==========================================================================
-  // ORTA SEVİYE — Orta bilişsel yük
-  // Hedef: Aktif çalışma belleği kullanımı, ödünç alma/verme gerektiren işlem
-  // ==========================================================================
-  orta: [
-    // --- Kategori A: İki basamaklı, ödünç alma gerektiren ---
     {
       id: 13,
-      question: "52 − 27 = ?",
-      options: ["23", "24", "25", "26"],
-      correctAnswer: 2,
-      points: 20,
-      category: "A",
-      difficulty: "orta"
+      question: 'Az önce gösterilen sayı <strong>7</strong> miydi?',
+      stimType: 'simple',
+      stimDur: 2000,
+      stimMain: '7',
+      taskHint: 'Çıkan sayıyı aklınızda tutun.',
+      taskReminder: 'Görev: Çıkan sayıyı hatırlayın',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 0,
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
     },
+
     {
       id: 14,
-      question: "38 + 47 = ?",
-      options: ["83", "84", "85", "86"],
+      question: 'Dizinin son kelimesi neydi?',
+      stimType: 'sequence',
+      stimDur: 6000,                    // Toplam süre (3 kelime × 1500ms + buffer)
+      stimItemDur: 1500,                // ⚡ YENİ: Her kelime 1500ms (Owen vd. 2005)
+      stimItemGap: 300,                 // ⚡ YENİ: Kelimeler arası 300ms boşluk
+      retentionDur: 1500,               // ⚡ YENİ: Bitince 1.5sn bekleme
+      taskHint: 'Çıkan kelimeleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Dizinin son kelimesini aklınızda tutun',
+      items: ['Elma', 'Armut', 'Kiraz'],
+      options: ['Elma', 'Armut', 'Kiraz', 'Üzüm'],
       correctAnswer: 2,
-      points: 20,
-      category: "A",
-      difficulty: "orta"
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
     },
+
     {
       id: 15,
-      question: "73 − 46 = ?",
-      options: ["25", "26", "27", "28"],
-      correctAnswer: 2,
-      points: 20,
-      category: "A",
-      difficulty: "orta"
+      question: 'Bu dizide kaç tane bir öncekiyle aynı harf vardı?',
+      stimType: 'nback',
+      stimDur: 8000,                    // Toplam (4 harf × ~1800ms)
+      stimItemDur: 1500,                // ⚡ YENİ: Her harf 1500ms (Owen standart)
+      stimItemGap: 300,                 // ⚡ YENİ: Harfler arası 300ms boşluk (ISI)
+      retentionDur: 1500,               // ⚡ YENİ: Bekleme 1.5sn
+      n_val: 1,
+      taskReminder: 'Görev: Kaç adet ardışık eşleşme olduğunu sayın.',
+      items: ['A', 'B', 'B', 'C'],      // 1-back eşleşme: B-B = 1
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 1,
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
     },
 
-    // --- Kategori B: Yakın çeldirici (aynı süperkategori) ---
     {
       id: 16,
-      question: "Kedi – Köpek – Aslan – Tavşan\nHangisi evcil hayvan değildir?",
-      options: ["Kedi", "Köpek", "Aslan", "Tavşan"],
-      correctAnswer: 2,
-      points: 20,
-      category: "B",
-      difficulty: "orta"
-    },
-    {
-      id: 17,
-      question: "Elma – Armut – Domates – Şeftali\nHangisi meyve değildir?",
-      options: ["Elma", "Armut", "Domates", "Şeftali"],
-      correctAnswer: 2,
-      points: 20,
-      category: "B",
-      difficulty: "orta"
-    },
-    {
-      id: 18,
-      question: "Keman – Gitar – Flüt – Piyano\nHangisi yaylı çalgı değildir?",
-      options: ["Keman", "Gitar", "Flüt", "Piyano"],
-      correctAnswer: 0,
-      points: 20,
-      category: "B",
-      difficulty: "orta"
-    },
-
-    // --- Kategori C: İki adımlı cebir ---
-    {
-      id: 19,
-      question: "2X − 6 = 10 ise X = ?",
-      options: ["6", "7", "8", "9"],
-      correctAnswer: 2,
-      points: 20,
-      category: "C",
-      difficulty: "orta"
-    },
-    {
-      id: 20,
-      question: "3X + 4 = 19 ise X = ?",
-      options: ["3", "4", "5", "6"],
-      correctAnswer: 2,
-      points: 20,
-      category: "C",
-      difficulty: "orta"
-    },
-    {
-      id: 21,
-      question: "(X / 2) + 3 = 8 ise X = ?",
-      options: ["8", "9", "10", "11"],
-      correctAnswer: 2,
-      points: 20,
-      category: "C",
-      difficulty: "orta"
-    },
-
-    // --- Kategori D: 5 item backward span (ters sıralı hatırlama) ---
-    {
-      id: 22,
-      question: "Sayılar: 3 – 8 – 5 – 1 – 6\nTers sırayla seçiniz.",
-      options: [
-        "1 – 6 – 5 – 8 – 3",
-        "3 – 8 – 5 – 1 – 6",
-        "6 – 5 – 1 – 8 – 3",
-        "6 – 1 – 5 – 8 – 3"
-      ],
-      correctAnswer: 3,
-      points: 20,
-      category: "D",
-      difficulty: "orta"
-    },
-    {
-      id: 23,
-      question: "Sayılar: 2 – 7 – 4 – 9 – 1\nTers sırayla seçiniz.",
-      options: [
-        "1 – 9 – 4 – 7 – 2",
-        "2 – 7 – 4 – 9 – 1",
-        "9 – 4 – 1 – 7 – 2",
-        "1 – 4 – 9 – 7 – 2"
-      ],
-      correctAnswer: 0,
-      points: 20,
-      category: "D",
-      difficulty: "orta"
-    },
-    {
-      id: 24,
-      question: "Sayılar: 6 – 3 – 8 – 2 – 5\nTers sırayla seçiniz.",
-      options: [
-        "6 – 3 – 8 – 2 – 5",
-        "5 – 2 – 8 – 3 – 6",
-        "2 – 5 – 8 – 6 – 3",
-        "5 – 8 – 2 – 3 – 6"
-      ],
+      question: 'Az önce gösterilen renk <strong>YEŞİL</strong> miydi?',
+      stimType: 'simple',
+      stimDur: 2000,
+      stimMain: 'MAVİ',
+      taskHint: 'Çıkan rengi aklınızda tutun.',
+      taskReminder: 'Görev: Çıkan rengi hatırlayın',
+      options: ['Evet', 'Hayır'],
       correctAnswer: 1,
-      points: 20,
-      category: "D",
-      difficulty: "orta"
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
     }
   ],
 
   // ==========================================================================
-  // ZOR SEVİYE — Yüksek bilişsel yük
-  // Hedef: Çoklu işlem zinciri, soyut karar, dual-task çalışma belleği
+  // ORTA — Orta bilişsel yük
   // ==========================================================================
-  zor: [
-    // --- Kategori A: Üç işlem zinciri / parantezli ---
+  orta: [
+
+    // ── Uzamsal ──────────────────────────────────────────────────────────────
     {
-      id: 25,
-      question: "(28 + 14) − (6 × 3) = ?",
-      options: ["22", "24", "26", "28"],
-      correctAnswer: 1,
-      points: 30,
-      category: "A",
-      difficulty: "zor"
+      id: 5,
+      question: 'A4 kağıdını önce sağdan sola, sonra yukarıdan aşağı katla. Katlanmış halinin sağ alt köşesine tek bir delik açılır. Kağıt tamamen açıldığında kaç delik oluşur?',
+      gorsel: {
+        tip: 'html',
+        icerik: `
+          <div class="visual-row folding-steps">
+            <div class="visual-box">
+              <svg width="70" height="90" viewBox="0 0 70 90">
+                <rect x="2" y="2" width="66" height="86" fill="none" stroke="#6c63ff" stroke-width="2"/>
+                <line x1="35" y1="2" x2="35" y2="88" stroke="#ff6584" stroke-width="2" stroke-dasharray="5,3"/>
+              </svg>
+            </div>
+            <div class="visual-arrow">→</div>
+            <div class="visual-box">
+              <svg width="45" height="90" viewBox="0 0 45 90">
+                <rect x="2" y="2" width="41" height="86" fill="none" stroke="#6c63ff" stroke-width="2"/>
+                <line x1="2" y1="45" x2="43" y2="45" stroke="#ff6584" stroke-width="2" stroke-dasharray="5,3"/>
+              </svg>
+            </div>
+            <div class="visual-arrow">→</div>
+            <div class="visual-box">
+              <svg width="45" height="50" viewBox="0 0 45 50">
+                <rect x="2" y="2" width="41" height="46" fill="none" stroke="#6c63ff" stroke-width="2"/>
+                <circle cx="37" cy="42" r="5" fill="#ff6584"/>
+              </svg>
+            </div>
+            <div class="visual-arrow">→</div>
+            <div class="visual-box">
+              <div class="question-mark-box">?</div>
+            </div>
+          </div>`
+      },
+      options: ['1 delik, tam ortada', '2 delik, üst ve alt ortada', '3 delik, L şeklinde', '4 delik, köşelerde simetrik'],
+      correctAnswer: 3,
+      points: 20,
+      category: 'U',
+      difficulty: 'orta'
     },
+
     {
-      id: 26,
-      question: "45 + 17 − 9 × 2 = ?",
-      options: ["42", "44", "46", "48"],
-      correctAnswer: 1,
-      points: 30,
-      category: "A",
-      difficulty: "zor"
+        id: 7,
+        question: '3, 6, 12, 24 dizisinde gelecek iki sonraki sayının toplamı nedir?',
+        options: ['72', '96', '144', '192'], 
+        correctAnswer: 2, 
+        points: 20,
+        category: 'A', 
+        difficulty: 'orta'
     },
+    // ── Bellek — Orta ─────────────────────────────────────────────────────────
+    {
+      id: 21,
+      question: 'Bu dizide kaç tane 2 adım önceki ile aynı harf vardı?',
+      stimType: 'nback',
+      stimDur: 12000,                   // 6 harf × ~2sn
+      stimItemDur: 1500,                // ⚡ Owen vd. standart
+      stimItemGap: 300,
+      retentionDur: 2000,
+      n_val: 2,
+      taskReminder: 'Görev: 2 adım önceki ile aynı harf zihinde sayın',
+      items: ['K', 'M', 'P', 'M', 'K', 'M'],  // 2-back eşleşmeleri: M-M(idx3,1), M-M(idx5,3) = 2
+      options: ['1', '2', '3', '4'],
+      correctAnswer: 1,                  // 2 eşleşme = "2" şıkkı (index 1)
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    {
+      id: 22,
+      question: '<strong>R</strong> harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 15000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['G', 'R', 'T', 'B'],
+      encDur: 2500,
+      retDur: 1500,
+      probeItem: 'R',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 0,
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    {
+      id: 24,
+      question: '<strong>Mavi</strong> dizinin kaçıncı elemanıydı?',
+      stimType: 'sequence',
+      stimDur: 6000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 1500,
+      taskHint: 'Çıkan renkleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir rengin pozisyonu sorulacak',
+      items: ['Kırmızı', 'Mavi', 'Yeşil'],
+      options: ['1', '2', '3', '4'],
+      correctAnswer: 1,
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
     {
       id: 27,
-      question: "(36 / 4) + (7 × 3) − 5 = ?",
-      options: ["23", "25", "27", "29"],
-      correctAnswer: 1,
-      points: 30,
-      category: "A",
-      difficulty: "zor"
+      question: 'Bu üç rakamın <strong>toplamı</strong> kaçtır?',
+      stimType: 'sequence',
+      stimDur: 6000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 1500,
+      taskHint: 'Çıkan rakamları ezberleyin.',
+      taskReminder: 'Görev: Sonda rakamların toplamı sorulacak',
+      items: ['4', '9', '2'],
+      options: ['13', '14', '15', '16'],
+      correctAnswer: 2,
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
     },
 
-    // --- Kategori B: Soyut/çapraz kategori ---
-    {
-      id: 28,
-      question: "Uçak – Arı – Yusufçuk – Kuş\nHangisi canlı değildir?",
-      options: ["Uçak", "Arı", "Yusufçuk", "Kuş"],
-      correctAnswer: 0,
-      points: 30,
-      category: "B",
-      difficulty: "zor"
-    },
     {
       id: 29,
-      question: "Mutluluk – Kitap – Sevinç – Üzüntü\nHangisi somut bir kavramdır?",
-      options: ["Mutluluk", "Kitap", "Sevinç", "Üzüntü"],
-      correctAnswer: 1,
-      points: 30,
-      category: "B",
-      difficulty: "zor"
-    },
+      question: '<strong>P</strong> harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 15000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['M', 'X', 'P', 'L', 'K'],
+      encDur: 3000,
+      retDur: 2000,
+      probeItem: 'P',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 0,
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    }
+  ],
+
+  // ==========================================================================
+  // ZOR — Yüksek bilişsel yük
+  // ==========================================================================
+  zor: [
+
+    // ── Uzamsal ──────────────────────────────────────────────────────────────
     {
-      id: 30,
-      question: "Adalet – Demir – Özgürlük – Cesaret\nHangisi soyut kavram değildir?",
-      options: ["Adalet", "Demir", "Özgürlük", "Cesaret"],
-      correctAnswer: 1,
+      id: 8,
+      question: `Aşağıdaki <strong>3×3 matristeki</strong> mor kareler iki bağımsız kurala göre değişiyor:<br>
+        <strong>Kural 1:</strong> Her <em>sütunda</em> kare boyutu <em>küçük → orta → büyük</em> olarak artar.<br>
+        <strong>Kural 2:</strong> Mor kare her <em>satırda</em> saat yönünde kayar (sol üst → sağ üst → sağ alt).<br>
+        <strong>"?" yerine hangisi gelmelidir?</strong>`,
+      gorsel: {
+        tip: 'html',
+        icerik: `
+          <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;justify-content:center;">
+            <div>
+              <div class="matrix-grid">
+                ${[
+                  { size: 'small', corner: 'tl' }, { size: 'small', corner: 'tr' }, { size: 'small', corner: 'br' },
+                  { size: 'medium', corner: 'tl' }, { size: 'medium', corner: 'tr' }, { size: 'medium', corner: 'br' },
+                  { size: 'large', corner: 'tl' }, { size: 'large', corner: 'tr' }, null
+                ].map((cell, i) => {
+                  if (cell === null) return `<div class="matrix-cell question-cell">?</div>`;
+                  const s = { small: 16, medium: 24, large: 32 }[cell.size];
+                  const offsets = { tl: [4,4], tr: [50-s-4,4], br: [50-s-4,50-s-4], bl: [4,50-s-4] };
+                  const [ox, oy] = offsets[cell.corner];
+                  return `<div class="matrix-cell"><svg width="50" height="50" viewBox="0 0 50 50"><rect x="${ox}" y="${oy}" width="${s}" height="${s}" fill="#7c4dff"/></svg></div>`;
+                }).join('')}
+              </div>
+            </div>
+            <div class="options-grid-visual">
+              ${[
+                { label: 'A', size: 'large', corner: 'bl' },
+                { label: 'B', size: 'medium', corner: 'br' },
+                { label: 'C', size: 'large', corner: 'br' },
+                { label: 'D', size: 'large', corner: 'tr' }
+              ].map(opt => {
+                const s = { small: 16, medium: 24, large: 32 }[opt.size];
+                const offsets = { tl: [4,4], tr: [50-s-4,4], br: [50-s-4,50-s-4], bl: [4,50-s-4] };
+                const [ox, oy] = offsets[opt.corner];
+                return `
+                  <div class="visual-option" data-harf="${opt.label}">
+                    <span class="visual-label">${opt.label}</span>
+                    <svg width="50" height="50" viewBox="0 0 50 50">
+                      <rect x="0" y="0" width="50" height="50" fill="none" stroke="#555" stroke-width="1"/>
+                      <rect x="${ox}" y="${oy}" width="${s}" height="${s}" fill="#7c4dff"/>
+                    </svg>
+                  </div>`;
+              }).join('')}
+            </div>
+          </div>`
+      },
+      gorselSecenekler: true,
+      options: ['Seçenek A', 'Seçenek B', 'Seçenek C', 'Seçenek D'],
+      correctAnswer: 2,
       points: 30,
-      category: "B",
-      difficulty: "zor"
+      category: 'U',
+      difficulty: 'zor'
     },
 
-    // --- Kategori C: İki değişkenli denklem sistemi ---
+    {
+      id: 9,
+      question: '<strong>3×3×3 boyutundaki bir büyük küp</strong>, her yüzeyi farklı renkte boyanmıştır (6 yüz = 6 farklı renk). Küp <strong>1×1×1\'lik küçük parçalara</strong> ayrılıyor. Tam olarak <strong>3 farklı renkle boyalı</strong> kaç küçük küp vardır?',
+      gorsel: {
+        tip: 'html',
+        icerik: `
+          <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;justify-content:center;">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <polygon points="10,60 60,30 110,60 60,90" fill="#a0c4ff" stroke="#333" stroke-width="1.5"/>
+              <polygon points="60,5 110,30 60,55 10,30" fill="#caffbf" stroke="#333" stroke-width="1.5"/>
+              <polygon points="110,30 110,80 60,105 60,55" fill="#ffd6a5" stroke="#333" stroke-width="1.5"/>
+              <line x1="27" y1="50" x2="77" y2="80" stroke="#333" stroke-width="0.8"/>
+              <line x1="43" y1="40" x2="93" y2="70" stroke="#333" stroke-width="0.8"/>
+              <line x1="27" y1="70" x2="77" y2="40" stroke="#333" stroke-width="0.8"/>
+              <line x1="43" y1="80" x2="93" y2="50" stroke="#333" stroke-width="0.8"/>
+            </svg>
+            <div style="font-size:0.9rem;line-height:1.8;color:#ccc;">
+              <div><span style="display:inline-block;width:14px;height:14px;background:#ff6b6b;border-radius:2px;vertical-align:middle;margin-right:6px;"></span><strong>Köşe küpleri:</strong> 3 renkle boyalı</div>
+              <div><span style="display:inline-block;width:14px;height:14px;background:#ffd93d;border-radius:2px;vertical-align:middle;margin-right:6px;"></span>Kenar küpleri: 2 renkle boyalı — 12 adet</div>
+              <div><span style="display:inline-block;width:14px;height:14px;background:#6bcb77;border-radius:2px;vertical-align:middle;margin-right:6px;"></span>Yüzey küpleri: 1 renkle boyalı — 6 adet</div>
+              <div><span style="display:inline-block;width:14px;height:14px;background:#555;border-radius:2px;vertical-align:middle;margin-right:6px;"></span>Merkez küp: 0 renkle boyalı — 1 adet</div>
+            </div>
+          </div>`
+      },
+      options: ['4', '8', '12', '6'],
+      correctAnswer: 1,
+      points: 30,
+      category: 'U',
+      difficulty: 'zor'
+    },
+
+    {
+      id: 10,
+      question: `Bir şekil dizisi <strong>iki bağımsız kurala</strong> göre ilerliyor:<br>
+        <strong>Kural 1:</strong> Daire her adımda ızgaranın içinde <em>bir satır yukarı çıkar</em> (5. satırdan başlar → 4 → 3 → ...).<br>
+        <strong>Kural 2:</strong> <em>Çizgi sayısı</em> her adımda bir artar (Adım 1'de 1 çizgi → 2 → 3 → ...).<br>
+        <strong>Adım 4'te ne olmalıdır?</strong>`,
+      gorsel: {
+        tip: 'html',
+        icerik: `
+          <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+            <div class="visual-row" style="gap:20px;">
+              ${[
+                { step: 1, circleRow: 4, lines: 1 },
+                { step: 2, circleRow: 3, lines: 2 },
+                { step: 3, circleRow: 2, lines: 3 }
+              ].map(s => `
+                <div class="visual-box">
+                  <span class="visual-label">Adım ${s.step}</span>
+                  <svg width="56" height="110" viewBox="0 0 56 110">
+                    ${[0,1,2,3,4].map(r =>
+                      `<rect x="8" y="${5+r*20}" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>`
+                    ).join('')}
+                    <circle cx="28" cy="${5+s.circleRow*20+9}" r="7" fill="#6c63ff"/>
+                    ${Array.from({length: s.lines}, (_, i) =>
+                      `<line x1="8" y1="${108-i*6}" x2="48" y2="${108-i*6}" stroke="#aaa" stroke-width="1.5"/>`
+                    ).join('')}
+                  </svg>
+                </div>
+              `).join('<span style="align-self:center;font-size:1.2rem;">→</span>')}
+              <span style="align-self:center;font-size:1.2rem;">→</span>
+              <div class="visual-box">
+                <span class="visual-label">Adım 4 = ?</span>
+                <div class="question-mark-box">?</div>
+              </div>
+            </div>
+            <div class="options-grid-visual">
+              ${[
+                { label: 'A', circleRow: 0, lines: 4 },
+                { label: 'B', circleRow: 1, lines: 4 },
+                { label: 'C', circleRow: 4, lines: 4 },
+                { label: 'D', circleRow: 1, lines: 5 }
+              ].map(opt => `
+                <div class="visual-option" data-harf="${opt.label}">
+                  <span class="visual-label">${opt.label}</span>
+                  <svg width="56" height="110" viewBox="0 0 56 110">
+                    ${[0,1,2,3,4].map(r =>
+                      `<rect x="8" y="${5+r*20}" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>`
+                    ).join('')}
+                    <circle cx="28" cy="${5+opt.circleRow*20+9}" r="7" fill="#6c63ff"/>
+                    ${Array.from({length: opt.lines}, (_, i) =>
+                      `<line x1="8" y1="${108-i*6}" x2="48" y2="${108-i*6}" stroke="#aaa" stroke-width="1.5"/>`
+                    ).join('')}
+                  </svg>
+                </div>`
+              ).join('')}
+            </div>
+          </div>`
+      },
+      gorselSecenekler: true,
+      options: ['Seçenek A', 'Seçenek B', 'Seçenek C', 'Seçenek D'],
+      correctAnswer: 1,
+      points: 30,
+      category: 'U',
+      difficulty: 'zor'
+    },
+
+    // ── Bellek — Yüksek ───────────────────────────────────────────────────────
     {
       id: 31,
-      question: "X + Y = 12 ve X − Y = 4 ise X = ?",
-      options: ["6", "7", "8", "9"],
-      correctAnswer: 2,
+      question: 'Bu dizide kaç tane 3 adım önceki ile aynı harf vardı?',
+      stimType: 'nback',
+      stimDur: 12000,                   // 6 harf × ~2sn
+      stimItemDur: 1500,                // ⚡ Owen vd. standart
+      stimItemGap: 300,                 // ⚡ ISI
+      retentionDur: 2000,
+      n_val: 3,
+      taskReminder: 'Görev: 3-back eşleşmelerini (3 adım önceki ile aynı harf) zihinde sayın',
+      // 3-back analiz: B(0), K(1), T(2), M(3), K(4), T(5)
+      //   M(3) vs B(0): farklı
+      //   K(4) vs K(1): EVET ✓
+      //   T(5) vs T(2): EVET ✓
+      // Toplam: 2 eşleşme
+      items: ['B', 'K', 'T', 'M', 'K', 'T'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 2,                  // 2 eşleşme = "2" şıkkı (index 2)
       points: 30,
-      category: "C",
-      difficulty: "zor"
-    },
-    {
-      id: 32,
-      question: "2X + Y = 15 ve X + Y = 9 ise X = ?",
-      options: ["4", "5", "6", "7"],
-      correctAnswer: 2,
-      points: 30,
-      category: "C",
-      difficulty: "zor"
-    },
-    {
-      id: 33,
-      question: "3X − Y = 10 ve X + Y = 6 ise X = ?",
-      options: ["3", "4", "5", "6"],
-      correctAnswer: 1,
-      points: 30,
-      category: "C",
-      difficulty: "zor"
+      category: 'B',
+      difficulty: 'zor'
     },
 
-    // --- Kategori D: 6 item + manipülasyon (dual-task) ---
     {
-      id: 34,
-      question: "Sayılar: 4 – 7 – 2 – 8 – 5 – 3\nBu sayılardan ÇİFT olanları sırasıyla seçiniz.",
-      options: [
-        "4 – 2 – 8",
-        "4 – 8 – 2",
-        "2 – 4 – 8",
-        "4 – 7 – 8"
-      ],
-      correctAnswer: 0,
-      points: 30,
-      category: "D",
-      difficulty: "zor"
-    },
-    {
-      id: 35,
-      question: "Sayılar: 9 – 3 – 6 – 1 – 7 – 4\nBu sayılardan TEK olanları TERS sırayla seçiniz.",
-      options: [
-        "9 – 3 – 1 – 7",
-        "7 – 1 – 3 – 9",
-        "1 – 3 – 7 – 9",
-        "9 – 7 – 3 – 1"
-      ],
+      id: 32,
+      question: '"<strong>M</strong>" harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 25000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['G', 'R', 'T', 'B', 'N', 'S'],
+      encDur: 4000,
+      retDur: 2000,
+      probeItem: 'M',
+      options: ['Evet', 'Hayır'],
       correctAnswer: 1,
       points: 30,
-      category: "D",
-      difficulty: "zor"
+      category: 'B',
+      difficulty: 'zor'
     },
+
+    {
+      id: 34,
+      question: '<strong>Son liste nedir?</strong><br>Kural: Harf gelince <strong>ekle</strong>, tekrar gelince <strong>çıkar</strong>.',
+      stimType: 'sequence',
+      stimDur: 10000,                   // 5 harf × ~2sn
+      stimItemDur: 1500,                // ⚡ Owen vd. standart
+      stimItemGap: 300,                 // ⚡ ISI
+      retentionDur: 2000,
+      taskHint: '<strong>Kural:</strong> Harf gelince listeye ekle. Aynı harf tekrar gelince listeden çıkar.',
+      taskReminder: 'Kural: Harf gelince EKLE • aynı harf tekrar gelince ÇIKAR. Sondaki listeyi seçin.',
+      items: ['A', 'B', 'A', 'C', 'B'],
+      // A → [A]
+      // B → [A, B]
+      // A (tekrar) → [B]
+      // C → [B, C]
+      // B (tekrar) → [C]
+      // Final: [C]
+      options: ['A', 'B', 'C', 'A,C'],
+      correctAnswer: 2,                  // "C" şıkkı
+      points: 30,
+      category: 'B',
+      difficulty: 'zor'
+    },
+
     {
       id: 36,
-      question: "Sayılar: 5 – 2 – 8 – 3 – 6 – 1\nBu sayılardan 4'TEN BÜYÜK olanları küçükten büyüğe seçiniz.",
-      options: [
-        "5 – 6 – 8",
-        "8 – 6 – 5",
-        "5 – 8 – 6",
-        "6 – 5 – 8"
-      ],
+      question: '"<strong>Y</strong>" harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 35000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U'],
+      encDur: 5000,
+      retDur: 3000,
+      probeItem: 'Y',
+      options: ['Evet', 'Hayır'],
       correctAnswer: 0,
       points: 30,
-      category: "D",
-      difficulty: "zor"
+      category: 'B',
+      difficulty: 'zor'
+    },
+
+    {
+      id: 39,
+      question: 'Ezberlediğin <span style="color:#ff5252">kırmızı</span> kelimeleri seçin',
+      stimType: 'sequence',
+      stimDur: 6000,                    // 3 öğe × 2sn
+      stimItemDur: 1800,                // ⚡ Biraz daha uzun (3 öğe)
+      stimItemGap: 200,                 // ⚡ Kısa boşluk
+      retentionDur: 1500,
+      taskHint: '<strong style="color:#ff5252">Kırmızı</strong> kelimeleri ezberle. <strong style="color:#5ba3ff">Mavi</strong> dikkat dağıtıcıdır.',
+      taskReminder: 'Sadece <span style="color:#ff5252">KIRMIZI</span> kelimeleri ezberleyin.',
+      items: ['Köpek', '4×3=?', 'Ayak'],
+      colors: ['#ff5252', '#5ba3ff', '#ff5252'],
+      options: ['Köpek', 'Ayak', 'Köpek, Ayak', 'Köpek, 4×3=?, Ayak'],
+      correctAnswer: 2,
+      points: 30,
+      category: 'B',
+      difficulty: 'zor'
     }
   ]
 };
 
 // ============================================================================
-// SÜRE AYARLARI (saniye)
+// SÜRE AYARLARI (saniye) — stimDur + cevap süresi dahil
 // ----------------------------------------------------------------------------
-// Her soru için MAKSİMUM süre. Katılımcı cevap verirse anında geçilir
-// (self-paced design). Süre dolduğunda otomatik geçiş yapılır.
+// Owen vd. (2005) standardına göre güncellendi:
+//   - Her uyaran 1500ms
+//   - ISI (uyaranlar arası) 300ms
+//   - Retention (bekleme) 1500-2000ms
+//   - Cevap için ek 8-15sn süre
 // ============================================================================
 export const timeByDifficulty = {
-  kolay: 20,   // 3-5 sn ortalama beklenir
-  orta: 35,    // 10-20 sn ortalama beklenir
-  zor: 60      // 25-45 sn ortalama beklenir
+  kolay: 40,    // ⚡ 30 → 40 (bellek görevleri için biraz daha)
+  orta:  75,    // ⚡ 60 → 75 (orta n-back daha uzun)
+  zor:   150    // ⚡ 120 → 150 (3-back ve sternberg uzun)
 };
 
 // ============================================================================
-// BLOK AKIŞ AYARLARI
-// ----------------------------------------------------------------------------
-// EEG protokolü için zamanlama parametreleri
+// PROTOKOL AYARLARI (EEG)
 // ============================================================================
 export const protocolConfig = {
-  baselineDuration: 180,        // 3 dk dinlenme/baseline (saniye)
-  interBlockRest: 60,           // Bloklar arası 1 dk dinlenme
-  interTrialInterval: 1500,     // Sorular arası 1.5 sn fixation cross (ms)
-  fixationDuration: 500,        // Soru öncesi fixation cross (ms)
-  nasaTlxTimeout: 120           // NASA-TLX için maks. süre (saniye)
+  baselineDuration:  180,   // 3 dk dinlenme/baseline
+  interBlockRest:     60,   // bloklar arası dinlenme (sn)
+  interTrialInterval: 1500, // sorular arası fixation cross (ms)
+  fixationDuration:   500,  // soru öncesi fixation cross (ms)
+  nasaTlxTimeout:     120,  // NASA-TLX maks. süre (sn)
+  
+  // ⚡ YENİ: Owen vd. (2005) standart değerleri (default)
+  defaultStimItemDur: 1500, // Her uyaran 1500ms
+  defaultStimItemGap:  300, // Inter-stimulus interval
+  defaultRetention:   1500  // Retention (bekleme) süresi
 };
 
-// Zorluk seviyesi sırası
 export const difficultyOrder = ['kolay', 'orta', 'zor'];
 
-// ============================================================================
-// KATEGORİ AÇIKLAMALARI (analiz aşamasında kullanmak için)
-// ============================================================================
 export const categoryInfo = {
-  A: { name: "Aritmetik İşlem", cognitive: "Sayısal işleme, mental hesaplama" },
-  B: { name: "Kategorik Karar", cognitive: "Semantik bellek, kategorizasyon" },
-  C: { name: "Cebirsel Akıl Yürütme", cognitive: "Soyut akıl yürütme, denklem çözme" },
-  D: { name: "Çalışma Belleği", cognitive: "Bilgi tutma + manipülasyon" }
+  U: { name: 'Uzamsal-Görsel', cognitive: 'Zihinsel döndürme, şekil analizi, örüntü tanıma' },
+  B: { name: 'Bellek',         cognitive: 'Kısa süreli bellek, n-back, Sternberg, sıra hatırlama' }
 };

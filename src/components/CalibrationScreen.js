@@ -56,12 +56,7 @@ const CalibrationScreen = ({ onCalibrationComplete, appState }) => {
           <p className="calibration-instruction-main">
             Lütfen ekrandaki <strong>+</strong> işaretine odaklanın.
           </p>
-          <div className="calib-progress-bar">
-            <div
-              className="calib-progress-fill"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
+
           <div className="calib-timer-row">
             <span className="calib-timer">{formatTime(timeLeft)}</span> 
           </div>
