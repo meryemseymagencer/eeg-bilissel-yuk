@@ -98,9 +98,6 @@ function App() {
     resetSession();
   };
 
-  // Test modu kontrolü
-  const isTestMode = true; // Test modunda true, normalde false
-
   return (
     <div className="App">
 
@@ -135,19 +132,11 @@ function App() {
       )}
 
       {/* 3. ADIM — Kalibrasyon */}
-      {step === 'calibration' && !isTestMode && (
+      {step === 'calibration' && (
         <CalibrationScreen
           appState={appState}
           onCalibrationComplete={() => setStep('exam')}
         />
-      )}
-
-      {step === 'calibration' && isTestMode && (
-        (() => {
-          console.log('[Test Modu] Kalibrasyon atlandı.');
-          setStep('exam');
-          return null;
-        })()
       )}
 
       {/* 4. ADIM — Sınav */}
@@ -173,10 +162,13 @@ function App() {
       {step === 'nasa' && currentDifficulty && (
         <NasaTLX
           difficulty={currentDifficulty}
+          syncMarker={syncMarker}              // ⚡ YENİ: EEG pause marker'ları için
           onSubmit={(nasaResult) => {
             syncMarker('nasa_submit', performance.now(), {
               difficulty: currentDifficulty,
-              rtlx_score: nasaResult.rtlxScore
+              rtlx_score: nasaResult.rtlxScore,
+              auto_submitted: nasaResult.autoSubmitted,
+              touched_count: nasaResult.touchedCount
             });
 
             setNasaByDifficulty(prev => ({
