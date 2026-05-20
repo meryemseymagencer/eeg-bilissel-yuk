@@ -4,14 +4,16 @@ import UserForm from './components/UserForm';
 import Exam from './components/Exam';
 import Result from './components/Result';
 import NasaTLX from './components/NasaTLX';
-import UEQS from './components/UEQS';                       // ⚡ YENİ
+import UEQS from './components/UEQS';
 import CalibrationScreen from './components/CalibrationScreen';
 import useSession from './hooks/useSession';
 import useEEGStream from './hooks/useEEGStream';
 import './App.css';
 
 function App() {
-  // ⚡ Akış: consent → form → calibration → exam → nasa → ueqs → result
+  // Akış: consent → form → calibration → exam → nasa → result
+  //                                                      ↓ (opsiyonel)
+  //                                                     ueqs → result (UEQ-S doldurulmuş)
   const [step, setStep] = useState('consent');
   
   const [consentInfo, setConsentInfo] = useState(null);
@@ -26,16 +28,19 @@ function App() {
     zor: null
   });
 
-  const [ueqsData, setUeqsData] = useState(null);  // ⚡ YENİ
+  const [ueqsData, setUeqsData] = useState(null);
 
   const {
     sessionId,
     backendOnline,
+    finalizeStatus,        // ⚡ YENİ
     createSession,
+    finalizeSession,       // ⚡ YENİ
     syncAnswers,
     syncNasa,
     syncNasaDetailed,
     syncMarker,
+    syncUeqs,              // ⚡ YENİ
     reset: resetSession
   } = useSession();
 
@@ -64,12 +69,21 @@ function App() {
     }
   }, [step, currentDifficulty, syncMarker]);
 
-  // ⚡ YENİ: UEQ-S onset marker
+  // UEQ-S açıldığında marker
   useEffect(() => {
     if (step === 'ueqs' && sessionId) {
       syncMarker('ueqs_onset', performance.now(), {});
     }
   }, [step, sessionId, syncMarker]);
+
+  // ⚡ YENİ: Result ekranı açıldığında session'ı otomatik finalize et
+  // (Tüm verileri diske kaydeder: metadata, eeg, answers, nasa, markers, ueqs)
+  useEffect(() => {
+    if (step === 'result' && sessionId && finalizeStatus === null) {
+      console.log('[App] Result ekranı açıldı → finalize tetikleniyor...');
+      finalizeSession();
+    }
+  }, [step, sessionId, finalizeStatus, finalizeSession]);
 
   const resetApp = () => {
     setStep('consent');
@@ -170,9 +184,9 @@ function App() {
               adjustedValues: nasaResult.adjustedValues
             });
 
-            // ⚡ Son seviye (zor) bittiyse → UEQ-S
+            // ⚡ Son seviye bittiyse → direkt Result'a (UEQ-S opsiyonel)
             if (difficultyIndex >= 3) {
-              setStep('ueqs');
+              setStep('result');
             } else {
               setStep('exam');
             }
@@ -180,7 +194,22 @@ function App() {
         />
       )}
 
-      {/* 6. ADIM — UEQ-S Kullanıcı Deneyimi Anketi (⚡ YENİ) */}
+      {/* 6. ADIM — Result Ekranı (UEQ-S butonu burada) */}
+      {step === 'result' && (
+        <Result
+          userInfo={userInfo}
+          answers={answers}
+          nasaByDifficulty={nasaByDifficulty}
+          ueqsData={ueqsData}
+          eegTimeline={timeline}
+          sessionId={sessionId}
+          finalizeStatus={finalizeStatus}        // ⚡ YENİ: 'saving'|'saved'|'error'|null
+          onRestart={resetApp}
+          onOpenUEQS={() => setStep('ueqs')}
+        />
+      )}
+
+      {/* 7. ADIM — UEQ-S (Opsiyonel, Result'tan açılır) */}
       {step === 'ueqs' && (
         <UEQS
           onSubmit={(ueqsResult) => {
@@ -192,26 +221,18 @@ function App() {
               overall: ueqsResult.overallScore
             });
 
-            // İsteğe bağlı: backend'e ayrı endpoint ile gönder
-            // (Şu an useSession.js'de ueqs endpoint'i yoksa eklenmesi gerek)
-            // syncUeqs(ueqsResult);
-            
+            // ⚡ Backend'e UEQ-S verisini gönder (dosyaya kaydedilecek)
+            syncUeqs(ueqsResult);
+
             console.log('[App] UEQ-S tamamlandı:', ueqsResult);
+            
+            // Geri Result'a dön
             setStep('result');
           }}
-        />
-      )}
-
-      {/* 7. ADIM — Sonuç */}
-      {step === 'result' && (
-        <Result
-          userInfo={userInfo}
-          answers={answers}
-          nasaByDifficulty={nasaByDifficulty}
-          ueqsData={ueqsData}                   // ⚡ YENİ
-          eegTimeline={timeline}
-          sessionId={sessionId}
-          onRestart={resetApp}
+          onCancel={() => {
+            // Vazgeçerse Result'a geri dön
+            setStep('result');
+          }}
         />
       )}
 

@@ -1,5 +1,5 @@
 /* ============================================================================
-   Result.css — Sınav Sonuç ve İstatistik Sayfası (Tamamen Temizlenmiş Sürüm)
+   Result.css — Sınav Sonuç ve İstatistik Sayfası (Optimize Edilmiş Sürüm)
    ============================================================================ */
 
 /* === ANA YAPI VE KART === */
@@ -292,90 +292,190 @@
   text-align: right;
 }
 
-/* ====== UEQ-S ÇAĞRI (CTA) BÖLÜMÜ ====== */
-.ueqs-cta-section {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 24px;
-  border-left: 4px solid #f59e0b;
-  text-align: center;
+/* ====== OTOMATİK VERİ KAYIT DURUMU (SADE VE ÇERCEVESİZ SUITE) ====== */
+.result-finalize-status {
+  margin: 12px auto 0;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.ueqs-cta-button {
-  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
-  color: white;
-  border: none;
-  padding: 14px 32px;
+.result-finalize-status.saving {
+  background: rgba(59, 130, 246, 0.1);
+  color: #1e40af;
+  border: 1px solid #93c5fd;
   border-radius: 8px;
-  font-size: 1.05rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* İstediğiniz çerçevesiz, sadece saf yazı olan kısım */
+.result-finalize-status.saved {
+  background: transparent !important;
+  border: none !important;
+  color: #15803d;
+  padding: 4px 0;
+}
+
+.result-finalize-status.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* === SADELEŞTİRİLMİŞ GERİ BİLDİRİM ALANI === */
+.ueqs-cta-area {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.ueqs-cta-button-simple {
+  background: transparent;
+  color: #f97316;
+  border: 2px solid #f97316;
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
   font-family: inherit;
   width: 100%;
   max-width: 400px;
-  margin: 0 auto;
+}
+
+.ueqs-cta-button-simple:hover {
+  background: #fff7ed;
+  
+}
+
+/* ====== UEQ-S TAMAMLANMIŞ DURUMU ====== */
+.ueqs-completed-section {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  border-left: 4px solid #10b981;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ueqs-completed-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.ueqs-completed-info {
+  flex: 1;
+}
+
+.ueqs-completed-info strong {
   display: block;
+  color: #065f46;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.ueqs-completed-scores {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: #047857;
+}
+
+.ueqs-completed-scores span {
+  background: rgba(255, 255, 255, 0.5);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.ueqs-completed-scores strong {
+  display: inline;
+  color: #065f46;
+  margin: 0;
+  font-size: inherit;
 }
 
 /* ============================================================================
-   EYLEMLER VE BUTON DÜZENİ (Tüm çakışmalar giderildi)
+   EYLEMLER VE BUTON DÜZENİ
    ============================================================================ */
 
 .result-actions {
   margin-top: 32px;
-}
-
-.result-actions-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
 }
 
-/* 4'lü Seçenek Izgarası (2 Yan Yana) */
+.action-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 4'lü Seçenek Izgarası (Alt kısımda 2 yan yana) */
 .export-buttons-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
-/* YENİDEN BAŞLA BUTONU (Koyu Mor) */
-.restart-button {
-  padding: 14px 20px;
+/* === YENİDEN BAŞLA BUTONU (Üstte, Geniş ve Baskın Mor) === */
+.restart-button.full-width {
+  padding: 16px 20px;
   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
   color: white !important;
   border: none !important;
-  border-radius: 10px;
-  font-size: 1.05rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
   text-align: center;
   width: 100%;
-  transition: none !important; 
-  box-shadow: none !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2) !important;
+  transition: all 0.2s ease !important;
   transform: none !important;
 }
 
-/* DIŞA AKTARMA BUTONLARI (Açık Mavi/Mor) */
+.restart-button.full-width:hover {
+  filter: brightness(1.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* === DIŞA AKTARMA BUTONLARI (Sakin Açık Mavi/Mor) === */
 .export-button {
   padding: 14px 20px;
   background: #f0f4ff !important;       
   color: #667eea !important;            
   border: 2px solid #667eea !important; 
   border-radius: 10px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   text-align: center;
   width: 100%;
-  transition: none !important; 
+  transition: all 0.2s ease !important;
   box-shadow: none !important;
   transform: none !important;
 }
 
-/* Pasif (İndirilemez/Tıklanamaz) Durumdaki Butonlar */
+.export-button:hover:not(:disabled) {
+  background: #e1e9ff !important;
+}
+
+/* Pasif (İndirilemez) Durum */
 .export-button:disabled {
   opacity: 0.4 !important;
   cursor: not-allowed !important;
@@ -384,31 +484,7 @@
   background: #f8f9fa !important;
 }
 
-/* HOVER EFEKTLERİNİ KESİN OLARAK İPTAL EDEN ZORUNLU KOD */
-div.result-actions-container .restart-button:hover,
-div.result-actions-container .restart-button:focus,
-div.result-actions-container .restart-button:active {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
-  color: white !important;
-  transform: none !important;
-  box-shadow: none !important;
-  filter: none !important;
-  opacity: 1 !important;
-}
-
-div.result-actions-container .export-button:hover,
-div.result-actions-container .export-button:focus,
-div.result-actions-container .export-button:active {
-  background: #f0f4ff !important;
-  color: #667eea !important;
-  border-color: #667eea !important;
-  transform: none !important;
-  box-shadow: none !important;
-  filter: none !important;
-  opacity: 1 !important;
-}
-
-/* === ANİMASYON & RESPONSIVE === */
+/* === ANİMASYON VE RESPONSIVE DÜZEN === */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -443,7 +519,14 @@ div.result-actions-container .export-button:active {
   .radar-legend-item {
     justify-content: space-between;
   }
-  /* Telefon ekranında 4 seçenek de alt alta geçsin ki taşmasın */
+  .ueqs-completed-section {
+    flex-direction: column;
+    text-align: center;
+  }
+  .ueqs-completed-scores {
+    justify-content: center;
+  }
+  /* Mobilde tüm alt butonlar alt alta listelenir */
   .export-buttons-grid {
     grid-template-columns: 1fr; 
   }

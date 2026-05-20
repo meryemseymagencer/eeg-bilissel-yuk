@@ -231,11 +231,12 @@ const Result = ({
   userInfo,
   answers,
   nasaByDifficulty,
-  ueqsData = null,        // ⚡ YENİ
+  ueqsData = null,
   eegTimeline = [],
   sessionId = null,
+  finalizeStatus = null,    // ⚡ YENİ: 'saving'|'saved'|'error'|null
   onRestart,
-  onOpenUEQS              // ⚡ YENİ
+  onOpenUEQS
 }) => {
 
   const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000';
@@ -372,12 +373,22 @@ const Result = ({
         {/* BAŞLIK */}
         <div className="result-header">
           <h1 className="result-title">Sınav Tamamlandı</h1>
-          <p className="result-subtitle">
-            Katılımcı: <strong>{userInfo?.participantId || 'Bilinmiyor'}</strong>
-            {userInfo?.department && ` • ${userInfo.department}`}
-          </p>
-          {sessionId && (
-            <p className="result-session-id">Oturum: {sessionId.slice(0, 8)}…</p>
+       
+          {/* Otomatik kayıt durumu */}
+          {finalizeStatus === 'saving' && (
+            <p className="result-finalize-status saving">
+              Veriler diske kaydediliyor...
+            </p>
+          )}
+          {finalizeStatus === 'saved' && (
+            <p className="result-finalize-status saved">
+              Tüm veriler güvenli bir şekilde kaydedildi ✓
+            </p>
+          )}
+          {finalizeStatus === 'error' && (
+            <p className="result-finalize-status error">
+             Otomatik kayıt başarısız - lütfen aşağıdaki butonlardan manuel indirin
+            </p>
           )}
         </div>
 
@@ -466,34 +477,48 @@ const Result = ({
             </p>
           </div>
         )}
-{/* EYLEMLER */}
+
+        {/* EYLEMLER */}
         <div className="result-actions">
           
-          {/* ⚡ UEQ-S Geri Bildirim Bölümü */}
-          {!ueqsData && (
-            // Henüz doldurulmamış → Buton göster (Doldurulunca hiçbir şey göstermez)
-            <div className="ueqs-cta-section">
+          {/* UEQ-S Geri Bildirim Bölümü */}
+          {!ueqsData ? (
+            // Arka plansız, sadeleştirilmiş buton alanı
+            <div className="ueqs-cta-area">
               <button 
-                className="ueqs-cta-button" 
+                className="ueqs-cta-button-simple" 
                 onClick={onOpenUEQS}
               >
                 Sistem Hakkında Geri Bildirim Ver
               </button>
-              <p className="ueqs-cta-note">
-                Kullanıcı deneyimi anketi (UEQ-S) - <strong>İsteğe bağlı</strong>, ~2 dakika
-              </p>
+            </div>
+          ) : (
+            // Doldurulmuş → Teşekkür + skor göster
+            <div className="ueqs-completed-section">
+              <span className="ueqs-completed-icon">✅</span>
+              <div className="ueqs-completed-info">
+                <strong>Geri bildiriminiz alındı, teşekkürler!</strong>
+                <div className="ueqs-completed-scores">
+                  <span>Pragmatic: <strong>{ueqsData.pragmaticScore.toFixed(2)}</strong></span>
+                  <span>Hedonic: <strong>{ueqsData.hedonicScore.toFixed(2)}</strong></span>
+                  <span>Overall: <strong>{ueqsData.overallScore.toFixed(2)}</strong></span>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* YENİ BUTON DÜZENİ */}
-          <div className="result-actions-container">
-            {/* Üstte Koyu Mor Yeniden Başla Butonu */}
-            <button className="restart-button" onClick={onRestart}>
+          {/* Buton Grubu Düzeni */}
+          <div className="action-buttons-container">
+            {/* Yeniden Başla - En Üstte Tek Başına */}
+            <button className="restart-button full-width" onClick={onRestart}>
               Yeniden Başla
             </button>
 
-            {/* Altta 2x2 İndirme Seçenekleri */}
+            {/* Diğer Butonlar - Altta 2'li Izgara Yapısında */}
             <div className="export-buttons-grid">
+              <button className="export-button" onClick={exportAnswersCSV}>
+                Sınav Sonuçları (CSV)
+              </button>
               <button
                 className="export-button export-eeg"
                 onClick={exportEEGStew}
@@ -514,12 +539,6 @@ const Result = ({
                 disabled={!sessionId}
               >
                 Markerlar (CSV)
-              </button>
-              <button 
-                className="export-button" 
-                onClick={exportAnswersCSV}
-              >
-                Sınav Sonuçları (CSV)
               </button>
             </div>
           </div>

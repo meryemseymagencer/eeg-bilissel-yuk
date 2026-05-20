@@ -2,11 +2,11 @@
 main.py — FastAPI Backend (v3 - Sinyal İşleme Entegre)
 ============================================================
 Bu versiyondaki değişiklikler:
-  1. Bandpass filtre eklendi (1-45 Hz, Butterworth 4. derece)
+  1. ⚡ Bandpass filtre eklendi (1-45 Hz, Butterworth 4. derece)
      Sebep: Lim et al. (2018) STEW ve Wang et al. (2024) ARFN ile uyumlu
-  2. Notch filtre eklendi (50 Hz, Türkiye şebeke gürültüsü)
+  2. ⚡ Notch filtre eklendi (50 Hz, Türkiye şebeke gürültüsü)
      Sebep: Türkiye'de elektrik 50 Hz; bu olmadan EEG'de büyük bir 50 Hz pik var
-  3. Stateful filtering (sosfilt_zi) — gerçek zamanlı akış için
+  3. ⚡ Stateful filtering (sosfilt_zi) — gerçek zamanlı akış için
      Sebep: Her chunk başında "filter transient" oluşmasını önler
   4. Per-session filter state — her oturum için bağımsız filter durumu
 
@@ -21,6 +21,8 @@ Bu versiyondaki değişiklikler:
 import asyncio
 import uuid
 import time
+import os
+import json
 import numpy as np
 import scipy.signal as signal
 import tensorflow as tf
@@ -29,7 +31,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse, JSONResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
-import json
 
 from cortex_client import CortexClient
 from eeg_pipeline import EPOC_CHANNELS
@@ -52,7 +53,7 @@ app.add_middleware(
 sessions = {}
 
 # ============================================================================
-#  ARFN MODELİ YÜKLEME (v3 - Hibrit: Mimari koddan + Ağırlıklar dosyadan)
+# ⚡ ARFN MODELİ YÜKLEME (v3 - Hibrit: Mimari koddan + Ağırlıklar dosyadan)
 # ----------------------------------------------------------------------------
 # Bu yöntem TensorFlow versiyon uyumsuzluğunu çözer:
 #   1. Model mimarisini gemini.py'daki build_model() ile oluştur
@@ -80,7 +81,7 @@ try:
     if os.path.exists(weights_path):
         try:
             from gemini import build_model
-            print("build_model() ile mimari oluşturuluyor...")
+            print("📦 build_model() ile mimari oluşturuluyor...")
             model = build_model(initial_centers=None)
             
             # Modeli compile et (load_weights için gerekli olabilir)
@@ -90,37 +91,37 @@ try:
                 metrics=['accuracy']
             )
             
-            print(f"Ağırlıklar yükleniyor: {weights_path}")
+            print(f"📥 Ağırlıklar yükleniyor: {weights_path}")
             model.load_weights(weights_path)
             model_version = "ARFN v2 (mimari+ağırlık, Test Acc: %78.2)"
-            print(f"ARFN v2 modeli başarıyla yüklendi! (hibrit yöntem)✓")
+            print(f"✓ ARFN v2 modeli başarıyla yüklendi! (hibrit yöntem)")
             print(f"  Model versiyonu: {model_version}")
         except Exception as e_weights:
-            print(f"Hibrit yükleme başarısız: {type(e_weights).__name__}")
+            print(f"⚠️ Hibrit yükleme başarısız: {type(e_weights).__name__}")
             print(f"   Detay: {str(e_weights)[:200]}")
             model = None
     
     # YÖNTEM 2: Tam model yüklemeyi dene (eğer TF uyumluysa)
     if model is None and os.path.exists(v2_model_path):
         try:
-            print(f"Tam v2 modeli yükleniyor: {v2_model_path}")
+            print(f"📥 Tam v2 modeli yükleniyor: {v2_model_path}")
             model = tf.keras.models.load_model(v2_model_path, custom_objects=custom_objects)
             model_version = "ARFN v2 (tam model, Test Acc: %78.2)"
-            print(f"ARFN v2 modeli başarıyla yüklendi! (tam yöntem)")
+            print(f"✓ ARFN v2 modeli başarıyla yüklendi! (tam yöntem)")
             print(f"  Model versiyonu: {model_version}")
         except Exception as e_v2:
-            print(f"Tam v2 yükleme başarısız: {type(e_v2).__name__}")
+            print(f"⚠️ Tam v2 yükleme başarısız: {type(e_v2).__name__}")
             model = None
     
     # YÖNTEM 3: Eski v1 modeline geri dön (güvenli yedek)
     if model is None and os.path.exists(v1_model_path):
-        print(f"Eski v1 modeline geri dönülüyor: {v1_model_path}")
+        print(f"📥 Eski v1 modeline geri dönülüyor: {v1_model_path}")
         model = tf.keras.models.load_model(v1_model_path, custom_objects=custom_objects)
         model_version = "ARFN v1 (eski, Test Acc: %70.1)"
-        print(f"ARFN v1 modeli yüklendi! (yedek)")
-        print(f"Model versiyonu: {model_version}")
+        print(f"✓ ARFN v1 modeli yüklendi! (yedek)")
+        print(f"  Model versiyonu: {model_version}")
 except Exception as e:
-    print(f"Model yükleme hatası: {e}")
+    print(f"✗ Model yükleme hatası: {e}")
     model = None
 
 # ============================================================================
@@ -260,23 +261,27 @@ async def create_session(data: UserInfo):
     session_id = str(uuid.uuid4())
     session_start_time = time.time()
 
-    #YENİ: Her oturum için filtre state başlat
+    # ⚡ YENİ: Her oturum için filtre state başlat
     zi_bp, zi_notch = _init_filter_state(n_channels=14)
 
     sessions[session_id] = {
         "user": data.userInfo,
+        "user_info": data.userInfo,           # ⚡ Alias (finalize için)
         "session_start_time": session_start_time,
         "answers": [],
         "nasa": {},
         "nasa_detailed": {},
+        "ueqs": None,                         # ⚡ YENİ: UEQ-S verisi
         "eeg_records": [],
+        "eeg_buffer": [],                     # ⚡ YENİ: finalize için (filtered_eeg_data alias)
         "markers": [],
         "state": "calibrating",
         "baseline_buffer": [],
         "baseline_mean": None,
         "baseline_std": None,
         "raw_stew_data": [],
-        #YENİ
+        "calibration_chunks": 0,              # ⚡ YENİ: kaç chunk toplandı
+        # ⚡ YENİ
         "zi_bandpass": zi_bp,
         "zi_notch": zi_notch,
         "filtered_eeg_data": []
@@ -349,6 +354,183 @@ async def add_marker(session_id: str, data: MarkerData):
 
 
 # ============================================================================
+# ⚡ YENİ: UEQ-S ENDPOINT (Etik kurul EK-6)
+# ============================================================================
+@app.post("/api/session/{session_id}/ueqs")
+async def sync_ueqs(session_id: str, data: Dict[str, Any]):
+    """
+    UEQ-S kullanıcı deneyimi anket sonuçlarını kaydet.
+    
+    Beklenen veri:
+      - rawValues: {1: 5, 2: 6, ...}        (1-7 arası ham değerler)
+      - normalizedValues: {1: 1, 2: 2, ...} (-3 ile +3 arası normalize)
+      - pragmaticScore: float                (madde 1-4 ortalaması)
+      - hedonicScore: float                  (madde 5-8 ortalaması)
+      - overallScore: float                  (Pragmatic + Hedonic / 2)
+      - submittedAt: ISO timestamp string
+    """
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    sessions[session_id]["ueqs"] = {
+        "rawValues": data.get("rawValues"),
+        "normalizedValues": data.get("normalizedValues"),
+        "pragmaticScore": data.get("pragmaticScore"),
+        "hedonicScore": data.get("hedonicScore"),
+        "overallScore": data.get("overallScore"),
+        "submittedAt": data.get("submittedAt"),
+        "received_at": time.time()
+    }
+    
+    print(f"[{session_id[:8]}] UEQ-S: Pragmatic={data.get('pragmaticScore')}, "
+          f"Hedonic={data.get('hedonicScore')}, Overall={data.get('overallScore')}")
+    
+    return {"status": "success"}
+
+
+# ============================================================================
+# ⚡ YENİ: SESSION FINALIZE — Otomatik Veri Kaydetme
+# ============================================================================
+@app.post("/api/session/{session_id}/finalize")
+async def finalize_session(session_id: str):
+    """
+    Sınav bittiğinde tüm session verilerini diske otomatik kaydet.
+    
+    Klasör yapısı:
+      session_data/
+      └── P01_session_abc12345/
+          ├── metadata.json         (demografik + onam)
+          ├── eeg_full.txt          (tüm EEG, STEW formatı: 14 kanal × N sample)
+          ├── answers.json          (cevaplar)
+          ├── nasa_tlx.json         (3 NASA-TLX)
+          ├── ueqs.json             (varsa)
+          └── markers.csv           (tüm event marker'lar)
+    
+    Bu endpoint Result ekranı açıldığında frontend tarafından otomatik çağrılır.
+    """
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    s = sessions[session_id]
+    user_info = s.get("user_info", {})
+    
+    # Katılımcı ID al (anonim) — yoksa session_id'nin ilk 8 karakteri
+    participant_id = user_info.get("participantId") or f"P_{session_id[:8]}"
+    safe_pid = "".join(c for c in participant_id if c.isalnum() or c == "_")
+    
+    # Klasör oluştur
+    base_dir = os.path.join(os.path.dirname(__file__), "session_data")
+    os.makedirs(base_dir, exist_ok=True)
+    
+    folder_name = f"{safe_pid}_session_{session_id[:8]}"
+    folder_path = os.path.join(base_dir, folder_name)
+    os.makedirs(folder_path, exist_ok=True)
+    
+    files_created = []
+    
+    try:
+        # 1. METADATA — Demografik + onam
+        metadata = {
+            "session_id": session_id,
+            "participant_id": participant_id,
+            "session_start_time": s.get("session_start_time"),
+            "session_finalize_time": time.time(),
+            "session_duration_sec": time.time() - s.get("session_start_time", time.time()),
+            "user_info": user_info,
+            "calibration_chunks_collected": s.get("calibration_chunks", 0),
+            "total_eeg_samples": len(s.get("filtered_eeg_data", [])),
+            "filter_settings": {
+                "bandpass": "1-45 Hz Butterworth (order=4)",
+                "notch": "50 Hz Notch (Q=30)",
+                "channels": "AF3,F7,F3,FC5,T7,P7,O1,O2,P8,T8,FC6,F4,F8,AF4 (STEW order)"
+            }
+        }
+        with open(os.path.join(folder_path, "metadata.json"), "w", encoding="utf-8") as f:
+            json.dump(metadata, f, indent=2, ensure_ascii=False, default=str)
+        files_created.append("metadata.json")
+        
+        # 2. EEG FULL — STEW formatı (filtered)
+        # filtered_eeg_data, websocket loop'unda toplanan filtered chunk'lardır
+        eeg_data = s.get("filtered_eeg_data") or s.get("eeg_buffer") or []
+        if eeg_data:
+            eeg_path = os.path.join(folder_path, "eeg_full.txt")
+            with open(eeg_path, "w") as f:
+                for sample in eeg_data:
+                    # STEW formatı: 14 kanal, virgülle ayrılmış
+                    if isinstance(sample, dict):
+                        # Channels dict'inden 14 kanalı çıkar (STEW sırasında)
+                        row = [str(sample.get(ch, 0.0)) for ch in EPOC_CHANNELS]
+                    elif isinstance(sample, (list, tuple)):
+                        row = [str(v) for v in sample[:14]]
+                    else:
+                        # numpy array
+                        try:
+                            row = [str(v) for v in list(sample)[:14]]
+                        except:
+                            continue
+                    f.write(",".join(row) + "\n")
+            files_created.append(f"eeg_full.txt ({len(eeg_data)} samples)")
+        
+        # 3. ANSWERS
+        answers = s.get("answers", [])
+        if answers:
+            with open(os.path.join(folder_path, "answers.json"), "w", encoding="utf-8") as f:
+                json.dump(answers, f, indent=2, ensure_ascii=False)
+            files_created.append(f"answers.json ({len(answers)} answers)")
+        
+        # 4. NASA-TLX
+        nasa_detailed = s.get("nasa_detailed", {})
+        nasa_simple = s.get("nasa", {})
+        nasa_data = {
+            "detailed": nasa_detailed,
+            "legacy_format": nasa_simple
+        }
+        with open(os.path.join(folder_path, "nasa_tlx.json"), "w", encoding="utf-8") as f:
+            json.dump(nasa_data, f, indent=2, ensure_ascii=False, default=str)
+        files_created.append("nasa_tlx.json")
+        
+        # 5. UEQ-S (eğer doldurulduysa)
+        if "ueqs" in s and s["ueqs"]:
+            with open(os.path.join(folder_path, "ueqs.json"), "w", encoding="utf-8") as f:
+                json.dump(s["ueqs"], f, indent=2, ensure_ascii=False, default=str)
+            files_created.append("ueqs.json")
+        
+        # 6. MARKERS CSV
+        markers = s.get("markers", [])
+        if markers:
+            csv_path = os.path.join(folder_path, "markers.csv")
+            with open(csv_path, "w", encoding="utf-8") as f:
+                f.write("event_type,client_timestamp_ms,server_timestamp,session_elapsed_sec,metadata_json\n")
+                for m in markers:
+                    meta_str = json.dumps(m.get("metadata", {}), ensure_ascii=False).replace('"', '""')
+                    f.write(f"{m['event_type']},{m['client_timestamp_ms']},{m['server_timestamp']},"
+                            f"{m['session_elapsed_sec']:.3f},\"{meta_str}\"\n")
+            files_created.append(f"markers.csv ({len(markers)} markers)")
+        
+        print(f"[{session_id[:8]}] ✓ Session finalized → {folder_path}")
+        print(f"[{session_id[:8]}]   Files: {', '.join(files_created)}")
+        
+        return {
+            "status": "success",
+            "session_id": session_id,
+            "participant_id": participant_id,
+            "folder_path": folder_path,
+            "folder_name": folder_name,
+            "files_created": files_created,
+            "stats": {
+                "total_eeg_samples": len(eeg_data),
+                "total_answers": len(answers),
+                "total_markers": len(markers),
+                "has_ueqs": "ueqs" in s and s["ueqs"] is not None
+            }
+        }
+    
+    except Exception as e:
+        print(f"[{session_id[:8]}] ✗ Finalize error: {e}")
+        raise HTTPException(status_code=500, detail=f"Finalize failed: {str(e)}")
+
+
+# ============================================================================
 # 4. WEBSOCKET ENDPOINTİ (EEG VERİ AKIŞI + FİLTRELEME)
 # ============================================================================
 @app.websocket("/ws/eeg/{session_id}")
@@ -370,7 +552,7 @@ async def eeg_stream(websocket: WebSocket, session_id: str):
                 ses = sessions[session_id]
 
                 # ============================================================
-                # SİNYAL İŞLEME — FİLTRELEME (Her chunk'ta uygulanır)
+                # ⚡ SİNYAL İŞLEME — FİLTRELEME (Her chunk'ta uygulanır)
                 # ============================================================
                 raw_chunk = np.array(sample["epoch_data"], dtype=np.float64)
 
@@ -389,7 +571,7 @@ async def eeg_stream(websocket: WebSocket, session_id: str):
                 # AŞAMA 1: KALİBRASYON (180 saniye baseline)
                 # ============================================================
                 if ses.get("state") == "calibrating":
-                    # Baseline filtrelenmiş veriden hesaplanır
+                    # ⚡ Baseline filtrelenmiş veriden hesaplanır
                     ses.setdefault("baseline_buffer", []).append(filtered_chunk)
 
                     if len(ses["baseline_buffer"]) >= CALIBRATION_CHUNKS:
@@ -406,7 +588,7 @@ async def eeg_stream(websocket: WebSocket, session_id: str):
                     if ses.get("baseline_mean") is not None:
                         model_chunk = (model_chunk - ses["baseline_mean"]) / (ses["baseline_std"] + 1e-7)
 
-                    # ARFN makalesi uyumlu PSD çıkarımı
+                    # ⚡ ARFN makalesi uyumlu PSD çıkarımı
                     features = extract_psd_arfn_style(model_chunk)
                     feature_buffer.append(features)
 
