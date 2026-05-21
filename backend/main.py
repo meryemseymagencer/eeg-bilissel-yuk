@@ -231,8 +231,9 @@ async def create_session(data: UserInfo):
         "baseline_mean": None,
         "baseline_std": None,
         "raw_stew_data": [],
-        "calibration_chunks": 0,              # ⚡ YENİ: kaç chunk toplandı
-        # ⚡ YENİ
+        "calibration_chunks": 0,
+        "crop_until_ts": None,                 # buton basımı sonrası kırpma bitiş zamanı (saniye)
+        "cropped_sample_count": 0,             # istatistik için
         "zi_bandpass": zi_bp,
         "zi_notch": zi_notch,
         "filtered_eeg_data": []
@@ -300,6 +301,19 @@ async def add_marker(session_id: str, data: MarkerData):
 
     if data.event_type in ["question_onset", "question_response", "block_start", "block_end"]:
         print(f"[{session_id[:8]}] MARKER: {data.event_type} | meta: {data.metadata}")
+
+    # ============================================================
+    # BUTON BASIMI KIRPMA — Motor artefakt 700ms
+    # Frontend "response_crop" gönderince crop_until_ts set edilir.
+    # WebSocket loop'u bu süre içindeki örnekleri EEG verisinden çıkarır.
+    # ============================================================
+    if data.event_type == "response_crop":
+        crop_ms = (data.metadata or {}).get("crop_ms", 700)
+        # client timestamp ms → saniyeye çevir (sunucu zamanıyla değil,
+        # EEG timestamp'ı ile karşılaştırılacak; WebSocket'te time.time() tabanlı)
+        sessions[session_id]["crop_until_ts"] = time.time() + crop_ms / 1000.0
+        print(f"[{session_id[:8]}] CROP: Sonraki {crop_ms}ms EEG verisi kırpılacak "
+              f"(~{int(crop_ms * 128 / 1000)} sample @ 128Hz)")
 
     return {"status": "success", "marker_id": len(sessions[session_id]["markers"]) - 1}
 
@@ -573,6 +587,15 @@ async def eeg_stream(websocket: WebSocket, session_id: str):
                 base_time = sample["timestamp"] - 4.0
 
                 for idx in range(len(raw_chunk)):
+                    # Kırpma kontrolü: buton basımından sonraki 700ms atlanır
+                    sample_time = base_time + (idx / 128.0)
+                    crop_until = ses.get("crop_until_ts")
+                    is_cropped = crop_until is not None and sample_time < crop_until
+
+                    if is_cropped:
+                        ses["cropped_sample_count"] = ses.get("cropped_sample_count", 0) + 1
+                        continue  # Bu sample'ı kaydetme
+
                     # Ham veri (STEW formatı için)
                     ses["raw_stew_data"].append(raw_chunk[idx, :14].tolist())
                     # Filtrelenmiş veri (analiz için)

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { questions, timeByDifficulty, difficultyOrder } from '../data/questions';
+import { questions, timeByDifficulty, blockDuration, difficultyOrder, protocolConfig } from '../data/questions';
 import './Exam.css';
 
 // ============================================================================
@@ -23,6 +23,11 @@ const Exam = ({ userInfo, startDifficultyIndex, onFinishLevel, onFinishExam, syn
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [timeLeft, setTimeLeft] = useState(null);
+
+  // Blok zamanlayıcısı (sabit süre blok tasarımı)
+  const [blockTimeLeft, setBlockTimeLeft] = useState(null);
+  const blockTimerRef = useRef(null);
+  const blockFinishedRef = useRef(false);  // çift tetiklemeyi önler
 
   // Stimulus fazı için görsel durum
   const [stimDisplay, setStimDisplay] = useState({ type: null, itemIndex: 0 });
@@ -75,6 +80,40 @@ const Exam = ({ userInfo, startDifficultyIndex, onFinishLevel, onFinishExam, syn
       blockStartSentRef.current = true;
     }
   }, [currentDifficultyIndex, currentDifficulty, currentQuestions.length, sendMarker, phaseForQuestion]);
+
+  // =========================================================================
+  // BLOK ZAMANLAYICISI — Sabit süre dolunca seviyeyi bitir
+  // =========================================================================
+  useEffect(() => {
+    blockFinishedRef.current = false;
+    const totalSec = blockDuration[currentDifficulty] ?? 120;
+    setBlockTimeLeft(totalSec);
+
+    blockTimerRef.current = setInterval(() => {
+      setBlockTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(blockTimerRef.current);
+          if (!blockFinishedRef.current) {
+            blockFinishedRef.current = true;
+            const levelAnswers = [];  // submitAnswer zaten answers state'ini güncelliyor
+            sendMarker('block_end', {
+              difficulty: currentDifficulty,
+              difficulty_index: currentDifficultyIndex,
+              reason: 'block_time_expired',
+            });
+            onFinishLevel(currentDifficulty, levelAnswers);
+            if (currentDifficultyIndex >= difficultyOrder.length - 1) {
+              if (typeof onFinishExam === 'function') onFinishExam([]);
+            }
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(blockTimerRef.current);
+  }, [currentDifficultyIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // =========================================================================
   // FAZ: STIMULUS — Bellek uyaranını göster, stimDur ms sonra soru fazına geç
@@ -208,20 +247,34 @@ const Exam = ({ userInfo, startDifficultyIndex, onFinishLevel, onFinishExam, syn
       rt_ms:           rtMs
     });
 
+    // Buton basımı sonrası motor artefakt kırpma (700ms)
+    if (!isTimeout) {
+      sendMarker('response_crop', performance.now(), {
+        question_id: currentQuestion.id,
+        crop_ms:     protocolConfig.cropAfterResponseMs,
+      });
+    }
+
     const newAnswers = [...answers, answerData];
     setAnswers(newAnswers);
 
     if (currentQuestionIndex >= currentQuestions.length - 1) {
-      sendMarker('block_end', {
-        difficulty:       currentDifficulty,
-        difficulty_index: currentDifficultyIndex
-      });
-
-      const levelAnswers = newAnswers.filter(a => a.difficulty === currentDifficulty);
-      onFinishLevel(currentDifficulty, levelAnswers);
-
-      if (currentDifficultyIndex >= difficultyOrder.length - 1) {
-        if (typeof onFinishExam === 'function') onFinishExam(newAnswers);
+      // Tüm sorular bitti, blok timer hâlâ çalışıyor olabilir.
+      // Blok timer zaten onFinishLevel'i çağıracak; burada sadece
+      // son soruya geldiğimizde timer'ı erken sonlandır.
+      clearInterval(blockTimerRef.current);
+      if (!blockFinishedRef.current) {
+        blockFinishedRef.current = true;
+        sendMarker('block_end', {
+          difficulty:       currentDifficulty,
+          difficulty_index: currentDifficultyIndex,
+          reason:           'questions_exhausted',
+        });
+        const levelAnswers = newAnswers.filter(a => a.difficulty === currentDifficulty);
+        onFinishLevel(currentDifficulty, levelAnswers);
+        if (currentDifficultyIndex >= difficultyOrder.length - 1) {
+          if (typeof onFinishExam === 'function') onFinishExam(newAnswers);
+        }
       }
     } else {
       const nextIdx = currentQuestionIndex + 1;
@@ -246,6 +299,7 @@ const Exam = ({ userInfo, startDifficultyIndex, onFinishLevel, onFinishExam, syn
   useEffect(() => {
     return () => {
       clearInterval(timerRef.current);
+      clearInterval(blockTimerRef.current);
       clearTimeout(stimTimerRef.current);
       clearTimeout(stimItemRef.current);
     };
@@ -329,11 +383,11 @@ const Exam = ({ userInfo, startDifficultyIndex, onFinishLevel, onFinishExam, syn
                       i < itemIndex ? 'past' :
                       i === itemIndex ? 'current' : 'future'
                     }`}
-                    style={q.colors?.[i] && i <= itemIndex
+                    style={q.colors?.[i] && i === itemIndex
                       ? { borderColor: q.colors[i], color: q.colors[i] }
                       : undefined}
                   >
-                    {i <= itemIndex ? it : '·'}
+                    {i === itemIndex ? it : '·'}
                   </span>
                 ))}
               </div>
@@ -404,13 +458,22 @@ const Exam = ({ userInfo, startDifficultyIndex, onFinishLevel, onFinishExam, syn
           </div>
         </div>
 
-        {/* PROGRESS */}
+        {/* PROGRESS — Blok geri sayım */}
         <div className="progress-container">
           <div className="progress-bar">
-            <div className="progress-fill" style={{ width: `${progressPercentage}%` }} />
+            <div
+              className="progress-fill"
+              style={{
+                width: `${blockTimeLeft !== null
+                  ? (blockTimeLeft / (blockDuration[currentDifficulty] ?? 120)) * 100
+                  : progressPercentage}%`
+              }}
+            />
           </div>
           <div className="progress-text">
-            Soru {currentQuestionIndex + 1} / {currentQuestions.length}
+            {blockTimeLeft !== null
+              ? `Blok: ${formatTime(blockTimeLeft)} kaldı · Soru ${currentQuestionIndex + 1}/${currentQuestions.length}`
+              : `Soru ${currentQuestionIndex + 1} / ${currentQuestions.length}`}
           </div>
         </div>
 

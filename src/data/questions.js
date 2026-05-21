@@ -119,21 +119,6 @@ export const questions = {
       difficulty: 'kolay'
     },
     {
-      id: 13,
-      question: 'Az önce gösterilen sayı <strong>7</strong> miydi?',
-      stimType: 'simple',
-      stimDur: 2000,
-      stimMain: '7',
-      taskHint: 'Çıkan sayıyı aklınızda tutun.',
-      taskReminder: 'Görev: Çıkan sayıyı hatırlayın',
-      options: ['Evet', 'Hayır'],
-      correctAnswer: 0,
-      points: 10,
-      category: 'B',
-      difficulty: 'kolay'
-    },
-
-    {
       id: 14,
       question: 'Dizinin son kelimesi neydi?',
       stimType: 'sequence',
@@ -169,16 +154,297 @@ export const questions = {
       difficulty: 'kolay'
     },
 
+    // ── Kolay Ek Sorular (blok süresi dolsun diye) ────────────────────────────
+
     {
-      id: 16,
-      question: 'Az önce gösterilen renk <strong>YEŞİL</strong> miydi?',
-      stimType: 'simple',
-      stimDur: 2000,
-      stimMain: 'MAVİ',
-      taskHint: 'Çıkan rengi aklınızda tutun.',
-      taskReminder: 'Görev: Çıkan rengi hatırlayın',
-      options: ['Evet', 'Hayır'],
+      id: 40,
+      question: 'Aşağı bakan ok saat yönünde 90° döndürülürse hangi yöne bakar?',
+      gorsel: {
+        tip: 'html',
+        icerik: `
+          <div class="visual-row">
+            <div class="visual-box">
+              <svg width="80" height="80" viewBox="0 0 80 80">
+                <line x1="40" y1="12" x2="40" y2="58" stroke="#6c63ff" stroke-width="5" stroke-linecap="round"/>
+                <polygon points="40,72 27,50 53,50" fill="#6c63ff"/>
+              </svg>
+            </div>
+            <div class="visual-arrow">→ <span style="font-size:0.8rem">90° saat yönünde</span></div>
+            <div class="visual-box">
+              <div class="question-mark-box">?</div>
+            </div>
+          </div>`
+      },
+      options: ['Sola', 'Sağa', 'Yukarı', 'Aşağı'],
+      correctAnswer: 0,
+      points: 10,
+      category: 'U',
+      difficulty: 'kolay'
+    },
+
+    {
+      id: 42,
+      question: 'Bu dizide kaç tane bir öncekiyle aynı harf vardı?',
+      stimType: 'nback',
+      stimDur: 8000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 1500,
+      n_val: 1,
+      taskReminder: 'Görev: Kaç adet ardışık eşleşme olduğunu sayın.',
+      items: ['X', 'Y', 'Y', 'Z'],
+      options: ['0', '1', '2', '3'],
       correctAnswer: 1,
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
+    },
+
+    {
+      id: 43,
+      question: 'Dizinin son kelimesi neydi?',
+      stimType: 'sequence',
+      stimDur: 6000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 1500,
+      taskHint: 'Çıkan kelimeleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Dizinin son kelimesini aklınızda tutun',
+      items: ['Araba', 'Uçak', 'Gemi'],
+      options: ['Araba', 'Uçak', 'Gemi', 'Tren'],
+      correctAnswer: 2,
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
+    },
+
+    {
+      id: 45,
+      question: 'Bu dizide kaç tane bir öncekiyle aynı harf vardı?',
+      stimType: 'nback',
+      stimDur: 8000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 1500,
+      n_val: 1,
+      taskReminder: 'Görev: Kaç adet ardışık eşleşme olduğunu sayın.',
+      items: ['H', 'K', 'K', 'L'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 1,
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
+    },
+
+    {
+      id: 24,
+      question: '<strong>Mavi</strong> dizinin kaçıncı elemanıydı?',
+      stimType: 'sequence',
+      stimDur: 6000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 1500,
+      taskHint: 'Çıkan renkleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir rengin pozisyonu sorulacak',
+      items: ['Kırmızı', 'Mavi', 'Yeşil'],
+      options: ['1', '2', '3', '4'],
+      correctAnswer: 1,
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
+    },
+
+    // ── Kolay Ek-2 (blok dolumu + çeşitlilik) ────────────────────────────────
+
+    {
+      id: 70,
+      question: 'Bu dizide kaç tane bir öncekiyle aynı harf vardı?',
+      stimType: 'nback',
+      stimDur: 8000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 1500,
+      n_val: 1,
+      taskReminder: 'Görev: Kaç adet ardışık eşleşme olduğunu sayın.',
+      // 1-back: P(0), Q(1), Q(2)→Q=Q ✓, R(3) = 1 eşleşme
+      items: ['P', 'Q', 'Q', 'R'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 1,
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
+    },
+
+    {
+      id: 71,
+      question: '"<strong>F</strong>" harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 8000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['A', 'T', 'F'],
+      encDur: 2000,
+      retDur: 1500,
+      probeItem: 'F',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 0,   // F listede VAR → Evet
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
+    },
+
+    {
+      id: 72,
+      question: 'Sağa bakan ok saat yönünün <strong>tersine</strong> 90° döndürülürse hangi yöne bakar?',
+      gorsel: {
+        tip: 'html',
+        icerik: `
+          <div class="visual-row">
+            <div class="visual-box">
+              <svg width="80" height="80" viewBox="0 0 80 80">
+                <line x1="12" y1="40" x2="58" y2="40" stroke="#6c63ff" stroke-width="5" stroke-linecap="round"/>
+                <polygon points="72,40 50,27 50,53" fill="#6c63ff"/>
+              </svg>
+            </div>
+            <div class="visual-arrow">→ <span style="font-size:0.8rem">90° saat yönü tersi</span></div>
+            <div class="visual-box">
+              <div class="question-mark-box">?</div>
+            </div>
+          </div>`
+      },
+      options: ['Sola', 'Sağa', 'Yukarı', 'Aşağı'],
+      correctAnswer: 2,   // Sağ (→) + saat yönü tersi 90° = Yukarı (↑)
+      points: 10,
+      category: 'U',
+      difficulty: 'kolay'
+    },
+
+    {
+      id: 73,
+      question: 'Bu dizide kaç tane bir öncekiyle aynı harf vardı?',
+      stimType: 'nback',
+      stimDur: 8000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 1500,
+      n_val: 1,
+      taskReminder: 'Görev: Kaç adet ardışık eşleşme olduğunu sayın.',
+      // 1-back: D(0), E(1), F(2), F(3)→F=F ✓, G(4) = 1 eşleşme
+      items: ['D', 'E', 'F', 'F', 'G'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 1,
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
+    },
+
+    // ── Kolay Ek-3 (blok garantisi) ───────────────────────────────────────────
+
+    {
+      id: 74,
+      question: 'Bu dizide kaç tane bir öncekiyle aynı harf vardı?',
+      stimType: 'nback',
+      stimDur: 8000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 1500,
+      n_val: 1,
+      taskReminder: 'Görev: Kaç adet ardışık eşleşme olduğunu sayın.',
+      // 1-back: E(0)→E(1)✓, E(1)→F(2)✗, F(2)→F(3)✓ = 2 eşleşme
+      items: ['E', 'E', 'F', 'F'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 2,
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
+    },
+
+    {
+      id: 75,
+      question: '"<strong>T</strong>" harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 8000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['N', 'R', 'S'],
+      encDur: 2000,
+      retDur: 1500,
+      probeItem: 'T',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 1,   // T listede YOK → Hayır
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
+    },
+
+    {
+      id: 76,
+      question: 'Dizinin <strong>ilk</strong> kelimesi neydi?',
+      stimType: 'sequence',
+      stimDur: 6000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 1500,
+      taskHint: 'Çıkan kelimeleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Dizinin ilk kelimesini aklınızda tutun',
+      items: ['Köpek', 'Kedi', 'Balık'],
+      options: ['Köpek', 'Kedi', 'Balık', 'Kuş'],
+      correctAnswer: 0,   // İlk kelime: Köpek
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
+    },
+
+    {
+      id: 77,
+      question: 'Bu dizide kaç tane bir öncekiyle aynı harf vardı?',
+      stimType: 'nback',
+      stimDur: 8000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 1500,
+      n_val: 1,
+      taskReminder: 'Görev: Kaç adet ardışık eşleşme olduğunu sayın.',
+      // 1-back: F(0), G(1), G(2)→G=G✓, H(3) = 1 eşleşme
+      items: ['F', 'G', 'G', 'H'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 1,
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
+    },
+
+    {
+      id: 78,
+      question: '"<strong>W</strong>" harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 4000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['W', 'Z'],
+      encDur: 2000,
+      retDur: 1500,
+      probeItem: 'W',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 0,   // W listede VAR → Evet
+      points: 10,
+      category: 'B',
+      difficulty: 'kolay'
+    },
+
+    {
+      id: 79,
+      question: 'Dizinin <strong>son</strong> kelimesi neydi?',
+      stimType: 'sequence',
+      stimDur: 6000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 1500,
+      taskHint: 'Çıkan kelimeleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Dizinin son kelimesini aklınızda tutun',
+      items: ['Aslan', 'Kaplan', 'Fil'],
+      options: ['Aslan', 'Kaplan', 'Fil', 'Kurt'],
+      correctAnswer: 2,   // Son kelime: Fil
       points: 10,
       category: 'B',
       difficulty: 'kolay'
@@ -278,24 +544,6 @@ export const questions = {
     },
 
     {
-      id: 24,
-      question: '<strong>Mavi</strong> dizinin kaçıncı elemanıydı?',
-      stimType: 'sequence',
-      stimDur: 6000,
-      stimItemDur: 1500,
-      stimItemGap: 300,
-      retentionDur: 1500,
-      taskHint: 'Çıkan renkleri sırayla ezberleyin.',
-      taskReminder: 'Görev: Sonda bir rengin pozisyonu sorulacak',
-      items: ['Kırmızı', 'Mavi', 'Yeşil'],
-      options: ['1', '2', '3', '4'],
-      correctAnswer: 1,
-      points: 20,
-      category: 'B',
-      difficulty: 'orta'
-    },
-
-    {
       id: 27,
       question: 'Bu üç rakamın <strong>toplamı</strong> kaçtır?',
       stimType: 'sequence',
@@ -313,19 +561,282 @@ export const questions = {
       difficulty: 'orta'
     },
 
+    // ── Orta Ek Sorular ───────────────────────────────────────────────────────
+
     {
-      id: 29,
-      question: '<strong>P</strong> harfi listede var mıydı?',
+      id: 50,
+      question: 'Bu sayı dizisinde kaç tane 2 adım önceki ile aynı rakam vardı?',
+      stimType: 'nback',
+      stimDur: 11000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 2000,
+      n_val: 2,
+      taskReminder: 'Görev: 2 adım önceki ile aynı rakamı zihinde sayın',
+      items: ['3', '7', '3', '7', '5'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 2,
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    {
+      id: 51,
+      question: '"<strong>K</strong>" harfi listede var mıydı?',
       stimType: 'sternberg',
-      stimDur: 9000,
+      stimDur: 7000,
       taskHint: 'Çıkan harfleri sırayla ezberleyin.',
       taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
-      encItems: ['M', 'X', 'P', 'L', 'K'],
-      encDur: 3000,
-      retDur: 2000,
-      probeItem: 'P',
+      encItems: ['A', 'M', 'Z', 'R'],
+      encDur: 2500,
+      retDur: 1500,
+      probeItem: 'K',
       options: ['Evet', 'Hayır'],
-      correctAnswer: 0,
+      correctAnswer: 1,
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    {
+      id: 52,
+      question: '<strong>Ay</strong> dizinin kaçıncı elemanıydı?',
+      stimType: 'sequence',
+      stimDur: 8000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 1500,
+      taskHint: 'Çıkan kelimeleri ve sıralarını ezberleyin.',
+      taskReminder: 'Görev: Sonda bir kelimenin konumu sorulacak',
+      items: ['Güneş', 'Ay', 'Yıldız', 'Bulut'],
+      options: ['1', '2', '3', '4'],
+      correctAnswer: 1,
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    {
+      id: 53,
+      question: 'Bu renk dizisinde kaç tane 2 adım önceki ile aynı renk vardı?',
+      stimType: 'nback',
+      stimDur: 11000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 2000,
+      n_val: 2,
+      taskReminder: 'Görev: 2 adım önceki ile aynı rengi zihinde sayın',
+      items: ['Kırmızı', 'Mavi', 'Kırmızı', 'Mavi', 'Yeşil'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 2,
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    // ── Orta Ek-2 ─────────────────────────────────────────────────────────────
+
+    {
+      id: 54,
+      question: 'Bu dizide kaç tane 2 adım önceki ile aynı harf vardı?',
+      stimType: 'nback',
+      stimDur: 11000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 2000,
+      n_val: 2,
+      taskReminder: 'Görev: 2 adım önceki ile aynı harfi zihinde sayın',
+      // 2-back: R(0),S(1),R(2)→R=R(0)✓, S(3)→S=S(1)✓, T(4)→T≠R(2) = 2 eşleşme
+      items: ['R', 'S', 'R', 'S', 'T'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 2,
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    {
+      id: 55,
+      question: '"<strong>H</strong>" harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 7000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['H', 'N', 'P', 'D'],
+      encDur: 2500,
+      retDur: 1500,
+      probeItem: 'H',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 0,   // H listede VAR → Evet
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    {
+      id: 56,
+      question: 'Bu sayı dizisinde kaç tane 2 adım önceki ile aynı rakam vardı?',
+      stimType: 'nback',
+      stimDur: 11000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 2000,
+      n_val: 2,
+      taskReminder: 'Görev: 2 adım önceki ile aynı rakamı zihinde sayın',
+      // 2-back: 6(0),3(1),6(2)→6=6(0)✓, 3(3)→3=3(1)✓, 8(4)→8≠6(2) = 2 eşleşme
+      items: ['6', '3', '6', '3', '8'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 2,
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    {
+      id: 57,
+      question: '"<strong>K</strong>" harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 7000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['B', 'F', 'L', 'S'],
+      encDur: 2500,
+      retDur: 1500,
+      probeItem: 'K',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 1,   // K listede YOK → Hayır
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    {
+      id: 58,
+      question: '<strong>Ay</strong> kelimesi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 7000,
+      taskHint: 'Çıkan kelimeleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir kelimenin listede olup olmadığı sorulacak',
+      encItems: ['Elma', 'Köpek', 'Masa', 'Kalem'],
+      encDur: 2500,
+      retDur: 1500,
+      probeItem: 'Ay',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 1,   // Ay listede YOK → Hayır
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    // ── Orta Ek-3 (blok garantisi) ────────────────────────────────────────────
+
+    {
+      id: 59,
+      question: 'Bu dizide kaç tane 2 adım önceki ile aynı harf vardı?',
+      stimType: 'nback',
+      stimDur: 11000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 2000,
+      n_val: 2,
+      taskReminder: 'Görev: 2 adım önceki ile aynı harfi zihinde sayın',
+      // 2-back: J(0),K(1),J(2)→J=J(0)✓, K(3)→K=K(1)✓, M(4)→M≠J(2) = 2 eşleşme
+      items: ['J', 'K', 'J', 'K', 'M'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 2,
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    {
+      id: 80,
+      question: '"<strong>W</strong>" harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 7000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['C', 'G', 'M', 'W'],
+      encDur: 2500,
+      retDur: 1500,
+      probeItem: 'W',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 0,   // W listede VAR → Evet
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    {
+      id: 81,
+      question: '<strong>Güneş</strong> dizinin kaçıncı elemanıydı?',
+      stimType: 'sequence',
+      stimDur: 8000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 1500,
+      taskHint: 'Çıkan kelimeleri ve sıralarını ezberleyin.',
+      taskReminder: 'Görev: Sonda bir kelimenin konumu sorulacak',
+      items: ['Ay', 'Güneş', 'Yıldız', 'Bulut'],
+      options: ['1', '2', '3', '4'],
+      correctAnswer: 1,   // Güneş = 2. eleman (index 1)
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    {
+      id: 82,
+      question: 'Bu sayı dizisinde kaç tane 2 adım önceki ile aynı rakam vardı?',
+      stimType: 'nback',
+      stimDur: 11000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 2000,
+      n_val: 2,
+      taskReminder: 'Görev: 2 adım önceki ile aynı rakamı zihinde sayın',
+      // 2-back: 9(0),2(1),9(2)→9=9(0)✓, 2(3)→2=2(1)✓, 5(4)→5≠9(2) = 2 eşleşme
+      items: ['9', '2', '9', '2', '5'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 2,
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    {
+      id: 83,
+      question: '"<strong>X</strong>" harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 7000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['T', 'V', 'X', 'Z'],
+      encDur: 2500,
+      retDur: 1500,
+      probeItem: 'X',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 0,   // X listede VAR → Evet
+      points: 20,
+      category: 'B',
+      difficulty: 'orta'
+    },
+
+    {
+      id: 84,
+      question: 'Bu renk dizisinde kaç tane 2 adım önceki ile aynı renk vardı?',
+      stimType: 'nback',
+      stimDur: 11000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 2000,
+      n_val: 2,
+      taskReminder: 'Görev: 2 adım önceki ile aynı rengi zihinde sayın',
+      // 2-back: Sarı(0),Mor(1),Sarı(2)→Sarı=Sarı(0)✓, Mor(3)→Mor=Mor(1)✓, Turuncu(4)→≠Sarı(2) = 2 eşleşme
+      items: ['Sarı', 'Mor', 'Sarı', 'Mor', 'Turuncu'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 2,
       points: 20,
       category: 'B',
       difficulty: 'orta'
@@ -363,144 +874,6 @@ export const questions = {
           </div>`
       },
       options: ['4', '8', '12', '6'],
-      correctAnswer: 1,
-      points: 30,
-      category: 'U',
-      difficulty: 'zor'
-    },
-
-    {
-      id: 10,
-      question: `Bir şekil dizisi <strong>iki bağımsız kurala</strong> göre ilerliyor:<br>
-        <strong>Kural 1:</strong> Daire her adımda ızgaranın içinde <em>bir satır yukarı çıkar</em> (5. satırdan başlar → 4 → 3 → ...).<br>
-        <strong>Kural 2:</strong> <em>Çizgi sayısı</em> her adımda bir artar (Adım 1'de 1 çizgi → 2 → 3 → ...).<br>
-        <strong>Adım 4'te ne olmalıdır?</strong>`,
-      gorsel: {
-        tip: 'html',
-        icerik: `
-          <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
-            <div class="visual-row" style="gap:20px;justify-content:center;">
-              <!-- Adım 1 -->
-              <div class="visual-box">
-                <span class="visual-label">Adım 1</span>
-                <svg width="56" height="110" viewBox="0 0 56 110">
-                  <rect x="8" y="5" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="25" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="45" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="65" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="85" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <circle cx="28" cy="94" r="7" fill="#6c63ff"/>
-                  <line x1="8" y1="102" x2="48" y2="102" stroke="#aaa" stroke-width="1.5"/>
-                </svg>
-              </div>
-              <span style="font-size:1.2rem;align-self:center;">→</span>
-              <!-- Adım 2 -->
-              <div class="visual-box">
-                <span class="visual-label">Adım 2</span>
-                <svg width="56" height="110" viewBox="0 0 56 110">
-                  <rect x="8" y="5" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="25" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="45" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="65" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="85" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <circle cx="28" cy="74" r="7" fill="#6c63ff"/>
-                  <line x1="8" y1="102" x2="48" y2="102" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="96" x2="48" y2="96" stroke="#aaa" stroke-width="1.5"/>
-                </svg>
-              </div>
-              <span style="font-size:1.2rem;align-self:center;">→</span>
-              <!-- Adım 3 -->
-              <div class="visual-box">
-                <span class="visual-label">Adım 3</span>
-                <svg width="56" height="110" viewBox="0 0 56 110">
-                  <rect x="8" y="5" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="25" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="45" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="65" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="85" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <circle cx="28" cy="54" r="7" fill="#6c63ff"/>
-                  <line x1="8" y1="102" x2="48" y2="102" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="96" x2="48" y2="96" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="90" x2="48" y2="90" stroke="#aaa" stroke-width="1.5"/>
-                </svg>
-              </div>
-              <span style="font-size:1.2rem;align-self:center;">→</span>
-              <div class="visual-box">
-                <span class="visual-label">Adım 4 = ?</span>
-                <div class="question-mark-box">?</div>
-              </div>
-            </div>
-            <div class="options-grid-visual">
-              <!-- Seçenek A: Daire üst kısımda (satır 1), 4 çizgi -->
-              <div class="visual-option" data-harf="A">
-                <span class="visual-label">A</span>
-                <svg width="56" height="110" viewBox="0 0 56 110">
-                  <rect x="8" y="5" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="25" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="45" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="65" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="85" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <circle cx="28" cy="14" r="7" fill="#6c63ff"/>
-                  <line x1="8" y1="102" x2="48" y2="102" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="96" x2="48" y2="96" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="90" x2="48" y2="90" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="84" x2="48" y2="84" stroke="#aaa" stroke-width="1.5"/>
-                </svg>
-              </div>
-              <!-- Seçenek B: Daire satır 2, 4 çizgi (DOĞRU) -->
-              <div class="visual-option" data-harf="B">
-                <span class="visual-label">B</span>
-                <svg width="56" height="110" viewBox="0 0 56 110">
-                  <rect x="8" y="5" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="25" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="45" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="65" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="85" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <circle cx="28" cy="34" r="7" fill="#6c63ff"/>
-                  <line x1="8" y1="102" x2="48" y2="102" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="96" x2="48" y2="96" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="90" x2="48" y2="90" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="84" x2="48" y2="84" stroke="#aaa" stroke-width="1.5"/>
-                </svg>
-              </div>
-              <!-- Seçenek C: Daire satır 5 (geriye gitti), 4 çizgi -->
-              <div class="visual-option" data-harf="C">
-                <span class="visual-label">C</span>
-                <svg width="56" height="110" viewBox="0 0 56 110">
-                  <rect x="8" y="5" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="25" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="45" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="65" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="85" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <circle cx="28" cy="94" r="7" fill="#6c63ff"/>
-                  <line x1="8" y1="102" x2="48" y2="102" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="96" x2="48" y2="96" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="90" x2="48" y2="90" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="84" x2="48" y2="84" stroke="#aaa" stroke-width="1.5"/>
-                </svg>
-              </div>
-              <!-- Seçenek D: Daire satır 2, 5 çizgi (çok fazla) -->
-              <div class="visual-option" data-harf="D">
-                <span class="visual-label">D</span>
-                <svg width="56" height="110" viewBox="0 0 56 110">
-                  <rect x="8" y="5" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="25" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="45" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="65" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <rect x="8" y="85" width="40" height="18" fill="none" stroke="#444" stroke-width="1"/>
-                  <circle cx="28" cy="34" r="7" fill="#6c63ff"/>
-                  <line x1="8" y1="102" x2="48" y2="102" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="96" x2="48" y2="96" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="90" x2="48" y2="90" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="84" x2="48" y2="84" stroke="#aaa" stroke-width="1.5"/>
-                  <line x1="8" y1="78" x2="48" y2="78" stroke="#aaa" stroke-width="1.5"/>
-                </svg>
-              </div>
-            </div>
-          </div>`
-      },
-      gorselSecenekler: true,
-      options: ['Seçenek A', 'Seçenek B', 'Seçenek C', 'Seçenek D'],
       correctAnswer: 1,
       points: 30,
       category: 'U',
@@ -608,6 +981,251 @@ export const questions = {
       points: 30,
       category: 'B',
       difficulty: 'zor'
+    },
+
+    // ── Zor Ek Sorular ────────────────────────────────────────────────────────
+
+    {
+      id: 60,
+      question: 'Bu sayı dizisinde kaç tane 3 adım önceki ile aynı rakam vardı?',
+      stimType: 'nback',
+      stimDur: 12000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 2000,
+      n_val: 3,
+      taskReminder: 'Görev: 3 adım önceki ile aynı rakamı zihinde sayın',
+      items: ['2', '5', '8', '2', '5', '9'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 2,
+      points: 30,
+      category: 'B',
+      difficulty: 'zor'
+    },
+
+    {
+      id: 61,
+      question: '"<strong>N</strong>" harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 9000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['K', 'T', 'B', 'N', 'F', 'S', 'D'],
+      encDur: 5000,
+      retDur: 3000,
+      probeItem: 'N',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 0,
+      points: 30,
+      category: 'B',
+      difficulty: 'zor'
+    },
+
+    {
+      id: 62,
+      question: '<strong>Son liste nedir?</strong><br>Kural: Harf gelince <strong>ekle</strong>, tekrar gelince <strong>çıkar</strong>.',
+      stimType: 'sequence',
+      stimDur: 13000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 2000,
+      taskHint: '<strong>Kural:</strong> Harf gelince listeye ekle. Aynı harf tekrar gelince listeden çıkar.',
+      taskReminder: 'Kural: Harf gelince EKLE • aynı harf tekrar gelince ÇIKAR. Sondaki listeyi seçin.',
+      items: ['X', 'Y', 'X', 'Z', 'Y', 'Z'],
+      options: ['X', 'Y', 'Z', 'Boş (hiçbir şey kalmadı)'],
+      correctAnswer: 3,
+      points: 30,
+      category: 'B',
+      difficulty: 'zor'
+    },
+
+    {
+      id: 29,
+      question: '<strong>P</strong> harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 9000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['M', 'X', 'P', 'L', 'K'],
+      encDur: 3000,
+      retDur: 2000,
+      probeItem: 'P',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 0,
+      points: 30,
+      category: 'B',
+      difficulty: 'zor'
+    },
+
+    // ── Zor Ek-2 ──────────────────────────────────────────────────────────────
+
+    {
+      id: 63,
+      question: 'Bu dizide kaç tane 3 adım önceki ile aynı harf vardı?',
+      stimType: 'nback',
+      stimDur: 12000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 2000,
+      n_val: 3,
+      taskReminder: 'Görev: 3 adım önceki ile aynı harfi zihinde sayın',
+      // 3-back: A(0),B(1),C(2),A(3)→A=A(0)✓, B(4)→B=B(1)✓, D(5)→D≠C(2) = 2 eşleşme
+      items: ['A', 'B', 'C', 'A', 'B', 'D'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 2,
+      points: 30,
+      category: 'B',
+      difficulty: 'zor'
+    },
+
+    {
+      id: 64,
+      question: '"<strong>H</strong>" harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 9000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+      encDur: 5000,
+      retDur: 3000,
+      probeItem: 'H',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 1,   // H listede YOK → Hayır
+      points: 30,
+      category: 'B',
+      difficulty: 'zor'
+    },
+
+    {
+      id: 65,
+      question: 'Bu sayı dizisinde kaç tane 3 adım önceki ile aynı rakam vardı?',
+      stimType: 'nback',
+      stimDur: 12000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 2000,
+      n_val: 3,
+      taskReminder: 'Görev: 3 adım önceki ile aynı rakamı zihinde sayın',
+      // 3-back: 4(0),7(1),2(2),4(3)→4=4(0)✓, 7(4)→7=7(1)✓, 9(5)→9≠2(2) = 2 eşleşme
+      items: ['4', '7', '2', '4', '7', '9'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 2,
+      points: 30,
+      category: 'B',
+      difficulty: 'zor'
+    },
+
+    {
+      id: 66,
+      question: '"<strong>V</strong>" harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 9000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['P', 'V', 'Z', 'R', 'M', 'S'],
+      encDur: 5000,
+      retDur: 3000,
+      probeItem: 'V',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 0,   // V listede VAR → Evet
+      points: 30,
+      category: 'B',
+      difficulty: 'zor'
+    },
+
+    // ── Zor Ek-3 (blok garantisi) ─────────────────────────────────────────────
+
+    {
+      id: 67,
+      question: 'Bu dizide kaç tane 3 adım önceki ile aynı harf vardı?',
+      stimType: 'nback',
+      stimDur: 12000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 2000,
+      n_val: 3,
+      taskReminder: 'Görev: 3 adım önceki ile aynı harfi zihinde sayın',
+      // 3-back: P(0),Q(1),R(2),P(3)→P=P(0)✓, Q(4)→Q=Q(1)✓, S(5)→S≠R(2) = 2 eşleşme
+      items: ['P', 'Q', 'R', 'P', 'Q', 'S'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 2,
+      points: 30,
+      category: 'B',
+      difficulty: 'zor'
+    },
+
+    {
+      id: 85,
+      question: '"<strong>L</strong>" harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 9000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['D', 'H', 'L', 'N', 'R', 'T'],
+      encDur: 5000,
+      retDur: 3000,
+      probeItem: 'L',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 0,   // L listede VAR → Evet
+      points: 30,
+      category: 'B',
+      difficulty: 'zor'
+    },
+
+    {
+      id: 86,
+      question: 'Bu dizide kaç tane 3 adım önceki ile aynı harf vardı?',
+      stimType: 'nback',
+      stimDur: 12000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 2000,
+      n_val: 3,
+      taskReminder: 'Görev: 3 adım önceki ile aynı harfi zihinde sayın',
+      // 3-back: X(0),Y(1),Z(2),X(3)→X=X(0)✓, Y(4)→Y=Y(1)✓, W(5)→W≠Z(2) = 2 eşleşme
+      items: ['X', 'Y', 'Z', 'X', 'Y', 'W'],
+      options: ['0', '1', '2', '3'],
+      correctAnswer: 2,
+      points: 30,
+      category: 'B',
+      difficulty: 'zor'
+    },
+
+    {
+      id: 87,
+      question: '"<strong>G</strong>" harfi listede var mıydı?',
+      stimType: 'sternberg',
+      stimDur: 9000,
+      taskHint: 'Çıkan harfleri sırayla ezberleyin.',
+      taskReminder: 'Görev: Sonda bir harfin listede olup olmadığı sorulacak',
+      encItems: ['C', 'E', 'G', 'I', 'K', 'M', 'O'],
+      encDur: 5000,
+      retDur: 3000,
+      probeItem: 'G',
+      options: ['Evet', 'Hayır'],
+      correctAnswer: 0,   // G listede VAR → Evet
+      points: 30,
+      category: 'B',
+      difficulty: 'zor'
+    },
+
+    {
+      id: 88,
+      question: '<strong>Son liste nedir?</strong><br>Kural: Harf gelince <strong>ekle</strong>, tekrar gelince <strong>çıkar</strong>.',
+      stimType: 'sequence',
+      stimDur: 10000,
+      stimItemDur: 1500,
+      stimItemGap: 300,
+      retentionDur: 2000,
+      taskHint: '<strong>Kural:</strong> Harf gelince listeye ekle. Aynı harf tekrar gelince listeden çıkar.',
+      taskReminder: 'Kural: Harf gelince EKLE • aynı harf tekrar gelince ÇIKAR. Sondaki listeyi seçin.',
+      // F→[F], G→[F,G], F(tekrar)→[G], H→[G,H], G(tekrar)→[H] → Son: [H]
+      items: ['F', 'G', 'F', 'H', 'G'],
+      options: ['F', 'G', 'H', 'F, G'],
+      correctAnswer: 2,   // Son liste: [H]
+      points: 30,
+      category: 'B',
+      difficulty: 'zor'
     }
   ]
 };
@@ -622,9 +1240,23 @@ export const questions = {
 //   - Cevap için ek 8-15sn süre
 // ============================================================================
 export const timeByDifficulty = {
-  kolay: 40,    // ⚡ 30 → 40 (bellek görevleri için biraz daha)
-  orta:  75,    // ⚡ 60 → 75 (orta n-back daha uzun)
-  zor:   150    // ⚡ 120 → 150 (3-back ve sternberg uzun)
+  kolay: 40,    // soru başına maksimum süre (sn)
+  orta:  75,
+  zor:   150
+};
+
+// ============================================================================
+// BLOK SÜRELERİ (saniye) — Literatür: STEW ~2.5 dk/seviye, N-back önerisi
+// ----------------------------------------------------------------------------
+// Kolay : 2 dk  → N-back 1, basit bellek
+// Orta  : 3 dk  → N-back 2, Sternberg 4-5 öğe
+// Zor   : 3 dk  → N-back 3, Sternberg 6-7 öğe
+// Toplam aktif: ~8 dk + dinlenme arası = ~9 dk
+// ============================================================================
+export const blockDuration = {
+  kolay: 120,   // 2 dakika
+  orta:  180,   // 3 dakika
+  zor:   180,   // 3 dakika
 };
 
 // ============================================================================
@@ -636,11 +1268,19 @@ export const protocolConfig = {
   interTrialInterval: 1500, // sorular arası fixation cross (ms)
   fixationDuration:   500,  // soru öncesi fixation cross (ms)
   nasaTlxTimeout:     120,  // NASA-TLX maks. süre (sn)
-  
-  // ⚡ YENİ: Owen vd. (2005) standart değerleri (default)
+
+  // Owen vd. (2005) standart değerleri
   defaultStimItemDur: 1500, // Her uyaran 1500ms
   defaultStimItemGap:  300, // Inter-stimulus interval
-  defaultRetention:   1500  // Retention (bekleme) süresi
+  defaultRetention:   1500, // Retention (bekleme) süresi
+
+  // ============================================================
+  // EEG KIRPMA — Buton basımı sonrası motor artefakt
+  // ------------------------------------------------------------
+  // Literatür: motor artefakt 200-500ms sürer (Luck 2014)
+  // 700ms → güvenlik marjı; 128Hz'de 90 sample atlanır
+  // ============================================================
+  cropAfterResponseMs: 700,
 };
 
 export const difficultyOrder = ['kolay', 'orta', 'zor'];
