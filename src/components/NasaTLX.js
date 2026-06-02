@@ -193,7 +193,7 @@ const NasaTLX = ({ difficulty, onSubmit, syncMarker }) => {
               />
             </div>
             <p className="nasa-warning-text">
-              ⚠️ <strong>Lütfen ekran dışında bir yere tıklamayın.</strong> Süre
+              <strong>Lütfen ekran dışında bir yere tıklamayın.</strong> Süre
               dolduğunda otomatik olarak bir sonraki adıma geçilecek.
             </p>
             <p className="nasa-progress-info">

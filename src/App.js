@@ -43,9 +43,9 @@ function App() {
     reset: resetSession
   } = useSession();
 
-  // ⚡ sessionId olmadan WebSocket bağlanma — 403 hatasını önler
+  // YENİ HALİ: Sınav boyunca (exam, nasa) bağlantıyı aktif tut,
+  // Result ekranına geçildiğinde bağlantı kapansın ama veriler App.js'de kalsın.
   const eegActive = !!sessionId && (step === 'exam' || step === 'nasa');
-
   const { cognitiveLoad, timeline, connected: eegConnected, appState } = useEEGStream(sessionId, eegActive);
 
   useEffect(() => {
@@ -123,6 +123,12 @@ function App() {
           userInfo={userInfo}
           startDifficultyIndex={difficultyIndex}
           syncMarker={syncMarker}
+          
+          // ⚡ YENİ EKLENEN PROPLAR: CalibrationScreen için gerekli veriler
+          appState={appState}
+          eegConnected={eegConnected}
+          // (Eğer useEEGStream'den latestSample çekiyorsan onu da ekle: latestSample={latestSample})
+
           onFinishLevel={(level, levelAnswers) => {
             setAnswers(prev => [...prev, ...levelAnswers]);
             setCurrentDifficulty(level);
