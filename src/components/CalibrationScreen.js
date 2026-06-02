@@ -9,19 +9,37 @@ import './CalibrationScreen.css';
 // Bu süre boyunca katılımcı:
 //   - Sabit bir noktaya bakar (fixation cross)
 //   - Zihnini rahatlatır
-//   - Normal şekilde göz kırpar (göz kırpmamak EEG'de ciddi artefakt yaratır)
+//   - Normal şekilde göz kırpar
 //   - Hareket etmemeye çalışır
 //
-// ⚠️ NOT: Backend'de calibration süresi de 180 sn olarak ayarlanmalı.
-//        Frontend timer yalnızca görsel — backend "testing" sinyalini
-//        gönderdiğinde sınav başlar.
+// Kalibrasyon NORMALDE backend "testing" sinyali gönderince biter.
+//
+// ⚡ DEV_MODE = true iken:
+//    - "Kalibrasyonu Atla" düğmesi görünür (geliştirme/test için)
+//    - GERÇEK DENEYDE: DEV_MODE = false yap → düğme gizlenir
+//
+// ⚡ GÜVENLİK AĞI: Frontend sayacı sıfıra inerse (backend "testing"
+//    sinyali hiç gelmezse), ekran sonsuza kadar takılmaz; otomatik geçer.
 // ============================================================================
 
-const BASELINE_DURATION_SEC = 180; // 3 dakika
+const BASELINE_DURATION_SEC = 180; // 3 dakika (gerçek deney)
+
+// ⚡ GELİŞTİRME BAYRAĞI — gerçek deneyde false yap!
+const DEV_MODE = true;
 
 const CalibrationScreen = ({ onCalibrationComplete, appState }) => {
   const [timeLeft, setTimeLeft] = useState(BASELINE_DURATION_SEC);
+  const [done, setDone] = useState(false);
 
+  // Tek noktadan bitirme (çift tetiklenmeyi önler)
+  const finish = (reason) => {
+    if (done) return;
+    setDone(true);
+    console.log(`[Calibration] Tamamlandı (sebep: ${reason})`);
+    onCalibrationComplete();
+  };
+
+  // Saniye sayacı
   useEffect(() => {
     if (timeLeft > 0) {
       const timerId = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
@@ -29,21 +47,28 @@ const CalibrationScreen = ({ onCalibrationComplete, appState }) => {
     }
   }, [timeLeft]);
 
+  // ⚡ Backend "testing" sinyali gelince bitir (normal yol)
   useEffect(() => {
-    // Backend'den "testing" sinyali geldiğinde ekranı kapat
     if (appState === "testing") {
-      onCalibrationComplete();
+      finish('backend_testing_signal');
     }
-  }, [appState, onCalibrationComplete]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appState]);
 
-  // Süre formatla: M:SS
+  // ⚡ GÜVENLİK AĞI: Sayaç sıfıra indiyse ve backend hâlâ cevap vermediyse,
+  //    sonsuz takılmayı önlemek için otomatik geç.
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      finish('timer_expired_fallback');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft]);
+
   const formatTime = (sec) => {
     const m = Math.floor(sec / 60);
     const s = sec % 60;
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
-
-  const progressPercent = ((BASELINE_DURATION_SEC - timeLeft) / BASELINE_DURATION_SEC) * 100;
 
   return (
     <div className="calibration-fullscreen-overlay">
@@ -58,8 +83,19 @@ const CalibrationScreen = ({ onCalibrationComplete, appState }) => {
           </p>
 
           <div className="calib-timer-row">
-            <span className="calib-timer">{formatTime(timeLeft)}</span> 
+            <span className="calib-timer">{formatTime(timeLeft)}</span>
           </div>
+
+          {/* ⚡ Sadece geliştirme modunda görünür — gerçek deneyde DEV_MODE=false */}
+          {DEV_MODE && (
+            <button
+              className="calib-skip-btn"
+              onClick={() => finish('dev_skip_button')}
+              type="button"
+            >
+             Kalibrasyonu Atla (Geliştirme)
+            </button>
+          )}
         </div>
       </div>
     </div>
