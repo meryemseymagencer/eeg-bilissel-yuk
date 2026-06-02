@@ -1,0 +1,32 @@
+{
+  "session_id": "1a00374b-80a8-4b62-9a37-d57dc5910b39",
+  "participant_id": "2",
+  "session_start_time": 1779276489.5384665,
+  "session_finalize_time": 1779277101.9733636,
+  "session_duration_sec": 612.434897184372,
+  "user_info": {
+    "participantId": "2",
+    "age": 22,
+    "gender": "kadın",
+    "department": "BİLGİSAYAR MÜHENDİSLİĞİ",
+    "educationLevel": "yuksek_lisans",
+    "hasNeurologicalCondition": false,
+    "neurologicalConditionDetail": null,
+    "hasEEGExperience": false,
+    "eegExperienceDetail": null,
+    "hasSimulationExperience": false,
+    "simulationExperienceDetail": null,
+    "submittedAt": "2026-05-20T11:28:09.526Z",
+    "consentInfo": {
+      "consentAccepted": true,
+      "consentTimestamp": "2026-05-20T11:28:00.628Z"
+    }
+  },
+  "calibration_chunks_collected": 0,
+  "total_eeg_samples": 37376,
+  "filter_settings": {
+    "bandpass": "1-45 Hz Butterworth (order=4)",
+    "notch": "50 Hz Notch (Q=30)",
+    "channels": "AF3,F7,F3,FC5,T7,P7,O1,O2,P8,T8,FC6,F4,F8,AF4 (STEW order)"
+  }
+}

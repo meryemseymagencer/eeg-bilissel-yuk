@@ -1,0 +1,314 @@
+/* ============================================================================
+   UEQS.css — Kullanıcı Deneyimi Anketi Stilleri (Web-First)
+   ============================================================================
+   ConsentForm ve UserForm ile uyumlu tasarım dili.
+   8 sıfat çifti, 7'li Likert dairesel radio buttonlar.
+   ============================================================================ */
+
+.ueqs-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+
+.ueqs-card {
+  background: white;
+  border-radius: 32px !important; 
+  box-shadow: none !important; /* Kartın etrafındaki gölgeyi (çerçeve görünümünü) sildik */
+  border: none !important;     /* Varsa dış çizgiyi tamamen kaldırdık */
+  max-width: 900px;
+  width: 100%;
+  margin: 20px 0;
+  overflow: hidden;
+}
+
+/* ====== HEADER ====== */
+.ueqs-header {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+  padding: 32px 40px;
+}
+
+.ueqs-header h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  text-align: center;
+  letter-spacing: -0.02em;
+}
+
+.ueqs-subtitle {
+  font-size: 0.95rem;
+  opacity: 0.95;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.ueqs-instructions {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin: 16px 0;
+  backdrop-filter: blur(4px);
+}
+
+.ueqs-instructions p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ====== PROGRESS BAR ====== */
+.ueqs-progress-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.ueqs-progress-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ueqs-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.ueqs-progress-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 100px;
+  text-align: right;
+}
+
+/* ====== ITEMS ====== */
+.ueqs-items {
+  padding: 24px 40px;
+}
+
+.ueqs-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid #e2e8f0;
+  transition: background 0.2s ease;
+}
+
+.ueqs-item:last-child {
+  border-bottom: none;
+}
+
+.ueqs-item.answered {
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.05), transparent);
+  border-left: 3px solid #22c55e;
+  padding-left: 12px;
+  border-radius: 4px;
+}
+
+.ueqs-item-number {
+  width: 32px;
+  height: 32px;
+  background: #4f46e5;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.ueqs-item.answered .ueqs-item-number {
+  background: #22c55e;
+}
+
+.ueqs-row {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ====== LABELS ====== */
+.ueqs-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #4a5568;
+  min-width: 130px;
+  flex-shrink: 0;
+}
+
+.ueqs-label-left {
+  text-align: right;
+}
+
+.ueqs-label-right {
+  text-align: left;
+}
+
+/* ====== RADIO BUTTONS (Daireler) ====== */
+.ueqs-radio-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+}
+
+.ueqs-radio-circle {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ueqs-radio-circle input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+.ueqs-radio-circle-inner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #cbd5e0;
+  border-radius: 50%;
+  background: white;
+  transition: all 0.2s ease;
+  display: block;
+}
+
+.ueqs-radio-circle:hover .ueqs-radio-circle-inner {
+  border-color: #7c3aed;
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+}
+
+.ueqs-radio-circle.selected .ueqs-radio-circle-inner {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  border-color: #4f46e5;
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+}
+
+/* Orta nokta vurgusu (4. daire = nötr) */
+.ueqs-radio-group .ueqs-radio-circle:nth-child(4) .ueqs-radio-circle-inner {
+  border-style: dashed;
+}
+
+.ueqs-radio-group .ueqs-radio-circle:nth-child(4).selected .ueqs-radio-circle-inner {
+  border-style: solid;
+}
+
+/* ====== ACTIONS ====== */
+.ueqs-actions {
+  padding: 24px 40px 32px;
+  background: #f7fafc;
+  border-top: 2px solid #e2e8f0;
+  text-align: center;
+}
+
+.ueqs-submit-btn {
+  background: #cbd5e0;
+  color: #718096;
+  border: none;
+  padding: 14px 40px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: not-allowed;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  min-width: 280px;
+}
+
+.ueqs-submit-btn.ready {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.ueqs-submit-btn.ready:hover {
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+}
+
+.ueqs-footer-note {
+  margin: 16px 0 0 0;
+  font-size: 0.85rem;
+  color: #718096;
+  font-style: italic;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 900px) {
+  .ueqs-label {
+    min-width: 90px;
+    font-size: 0.85rem;
+  }
+  
+  .ueqs-radio-circle {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .ueqs-radio-circle-inner {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (max-width: 700px) {
+  .ueqs-header,
+  .ueqs-items,
+  .ueqs-actions {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  .ueqs-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .ueqs-label {
+    min-width: 0;
+    text-align: center !important;
+  }
+  
+  .ueqs-radio-group {
+    gap: 4px;
+  }
+  
+  .ueqs-radio-circle {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .ueqs-radio-circle-inner {
+    width: 22px;
+    height: 22px;
+  }
+}

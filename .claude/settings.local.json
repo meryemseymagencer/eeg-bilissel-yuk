@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Skill(anthropic-skills:consolidate-memory)",
+      "Skill(anthropic-skills:consolidate-memory:*)",
+      "Bash(node -e ' *)",
+      "Bash(pip show *)",
+      "Bash(python create_pdf.py)"
+    ]
+  }
+}

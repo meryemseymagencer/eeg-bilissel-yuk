@@ -18,7 +18,6 @@ import scipy.signal as signal
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, regularizers
-
 # Mevcut pipeline'dan veri yükleme ve sinyal işleme
 from eeg_pipeline import (
     load_stew_data,

@@ -1,5 +1,5 @@
 """
-Emotiv Cortex API – WebSocket istemcisi (Düzeltilmiş)
+Emotiv Cortex API – WebSocket istemcisi (Düzeltilmiş v2)
 ======================================================
 Desteklenen cihaz : Emotiv EPOC X (14 kanal, 128 Hz)
 Protokol          : JSON-RPC 2.0 over WSS (wss://localhost:6868)
@@ -11,7 +11,13 @@ Ortam değişkenleri (.env):
     EMOTIV_CLIENT_SECRET  – Emotiv uygulama gizli anahtarı
     EEG_SIMULATION        – "1" → zorunlu simülasyon modu (test için)
 
-Düzeltmeler:
+DÜZELTMELER (v2):
+    ⚡ EPOC_CHANNELS sırası STEW veri seti ile uyumlu hale getirildi
+       (Lim et al., 2018 — STEW orijinal kanal sırası)
+       Bu, model eğitimi (eeg_pipeline.py) ile inference (main.py)
+       arasındaki kanal sıralaması tutarlılığını sağlar.
+
+Önceki düzeltmeler:
     1. queryHeadsets yanıt formatı güvenli hale getirildi (dict veya liste)
     2. Subscribe onayı ile EEG veri akışı çakışması giderildi (asyncio.Queue)
     3. Token yenileme thread-safe yapıldı (asyncio.Lock)
@@ -46,13 +52,28 @@ EPOCH_SAMPLES      = 512       # 4 saniyelik pencere (128 Hz × 4 s)
 TOKEN_REFRESH_MARGIN = 300     # saniye – sona ermeden 5 dk önce yenile
 MAX_RECONNECT_TRIES  = 3       # otomatik yeniden bağlanma denemesi
 
-# AGENTS.md'de tanımlanan kanal sırası (STEW eğitim verisiyle uyumlu)
+# ============================================================================
+# ⚡ DÜZELTİLDİ: STEW veri seti ile uyumlu kanal sırası
+# ----------------------------------------------------------------------------
+# Referans: Lim, W. L., Sourina, O., & Wang, L. P. (2018).
+#           STEW: Simultaneous task EEG workload data set.
+#           IEEE Trans. Neural Syst. Rehabil. Eng., 26(11), 2106-2114.
+#
+# Bu sıra aynı zamanda Emotiv EPOC X cihazının hardware/firmware sırası
+# olup eeg_pipeline.py'daki EPOC_CHANNELS ile birebir aynıdır.
+#
+# ÖNEMLİ: Model bu sırayla eğitilmiştir; sıra değişirse modelin tahminleri
+#         tamamen geçersiz hale gelir!
+# ============================================================================
 EPOC_CHANNELS = [
-    "AF3", "AF4", "F3", "F4", "F7", "F8",
-    "FC5", "FC6", "P7", "P8", "T7", "T8", "O1", "O2",
+    "AF3", "F7", "F3", "FC5", "T7", "P7", "O1",
+    "O2", "P8", "T8", "FC6", "F4", "F8", "AF4",
 ]
 
 # Cortex API'nin EPOC X için döndürdüğü ham kanal sırası (varsayılan)
+# Bu sıra Emotiv'in raw stream çıktısıdır — yukarıdaki STEW sırası ile
+# zaten aynı kanalları içerir, sadece COUNTER/INTERPOLATED gibi
+# meta-sütunlar ek olarak vardır.
 _CORTEX_RAW_COLS = [
     "COUNTER", "INTERPOLATED",
     "AF3", "F7", "F3", "FC5", "T7", "P7", "O1",
@@ -223,9 +244,6 @@ class CortexClient:
 
     # ------------------------------------------------------------------
     # FIX 1: Merkezi mesaj dinleyici
-    # Tüm WebSocket mesajlarını tek noktada alır:
-    #   • RPC yanıtı (id alanı varsa) → ilgili Future'ı çözer
-    #   • Abonelik verisi (eeg, sys …) → data_queue'ya ekler
     # ------------------------------------------------------------------
 
     async def _message_listener(self):
@@ -240,7 +258,6 @@ class CortexClient:
                 msg_id = msg.get("id")
 
                 if msg_id is not None and msg_id in self._rpc_pending:
-                    # Bu mesaj beklenen bir RPC yanıtı
                     fut = self._rpc_pending.pop(msg_id)
                     if not fut.done():
                         if "error" in msg:
@@ -250,13 +267,10 @@ class CortexClient:
                         else:
                             fut.set_result(msg.get("result", {}))
                 else:
-                    # Abonelik verisi veya bildirim
                     try:
                         self._data_queue.put_nowait(msg)
                     except asyncio.QueueFull:
-                        log.warning(
-                            "Veri kuyruğu doldu, en eski paket atıldı."
-                        )
+                        log.warning("Veri kuyruğu doldu, en eski paket atıldı.")
                         try:
                             self._data_queue.get_nowait()
                         except asyncio.QueueEmpty:
@@ -270,7 +284,6 @@ class CortexClient:
         except Exception as exc:
             log.error("Dinleyici görevi beklenmedik hata: %s", exc)
         finally:
-            # Bekleyen tüm RPC future'larını iptal et
             for fut in self._rpc_pending.values():
                 if not fut.done():
                     fut.set_exception(
@@ -279,11 +292,10 @@ class CortexClient:
             self._rpc_pending.clear()
 
     # ------------------------------------------------------------------
-    # JSON-RPC gönder / al  (dinleyici ile uyumlu)
+    # JSON-RPC gönder / al
     # ------------------------------------------------------------------
 
     async def _send(self, method: str, params: dict) -> dict:
-        """JSON-RPC isteği gönderir; yanıtı dinleyici üzerinden bekler."""
         rpc_id, payload = _RPC.call(method, params)
 
         loop = asyncio.get_event_loop()
@@ -293,9 +305,7 @@ class CortexClient:
         await self._ws.send(payload)
 
         try:
-            return await asyncio.wait_for(
-                asyncio.shield(fut), timeout=15
-            )
+            return await asyncio.wait_for(asyncio.shield(fut), timeout=15)
         except asyncio.TimeoutError:
             self._rpc_pending.pop(rpc_id, None)
             raise TimeoutError(
@@ -314,7 +324,6 @@ class CortexClient:
                 "Proje kök dizinindeki .env dosyasını kontrol edin."
             )
 
-        # 1) Erişim isteği — EmotivPRO/Launcher'da onay gerekebilir
         access = await self._send(
             "requestAccess",
             {"clientId": self.client_id, "clientSecret": self.client_secret},
@@ -325,7 +334,6 @@ class CortexClient:
                 "EMOTIV Launcher penceresinde uygulamaya izin verin."
             )
 
-        # 2) Token al
         auth = await self._send(
             "authorize",
             {
@@ -340,13 +348,10 @@ class CortexClient:
         log.info("Cortex token alındı.")
 
     async def _refresh_token_if_needed(self):
-        """Token süresi dolmak üzereyse thread-safe şekilde yeniler."""
         if time.time() < self._token_expires_at - TOKEN_REFRESH_MARGIN:
             return
 
-        # FIX 2: Kilit — birden fazla coroutine aynı anda yenilemesin
         async with self._token_lock:
-            # Kilit alındıktan sonra tekrar kontrol et
             if time.time() < self._token_expires_at - TOKEN_REFRESH_MARGIN:
                 return
             log.info("Cortex token yenileniyor...")
@@ -368,13 +373,8 @@ class CortexClient:
     # ------------------------------------------------------------------
 
     async def _open_cortex_session(self):
-        """Bağlı kaskı bulur ve aktif Cortex oturumu açar."""
-
         raw = await self._send("queryHeadsets", {})
 
-        # FIX 3: Cortex sürümüne göre yanıt formatı farklı olabilir
-        #   • Yeni sürümler: {"headsets": [...]}
-        #   • Eski sürümler: doğrudan [...]
         if isinstance(raw, dict):
             headsets = raw.get("headsets", [])
         elif isinstance(raw, list):
@@ -407,11 +407,6 @@ class CortexClient:
     # ------------------------------------------------------------------
 
     async def _subscribe_eeg(self) -> list[str]:
-        """
-        EEG stream'ine abone olur; kanal sütun listesini döner.
-        FIX 1: Artık dinleyici görevi sayesinde subscribe onayı ile
-               EEG paketleri çakışmaz.
-        """
         result = await self._send(
             "subscribe",
             {
@@ -424,7 +419,22 @@ class CortexClient:
         for stream_info in result.get("success", []):
             if stream_info.get("streamName") == "eeg":
                 cols = stream_info.get("cols", _CORTEX_RAW_COLS)
-                log.info("EEG sütunları: %s", cols)
+                log.info("EEG sütunları (Cortex): %s", cols)
+
+                # ⚡ Doğrulama: Cortex'ten gelen kanalların hepsi
+                # EPOC_CHANNELS listesinde var mı?
+                received_channels = set(cols) & _CHANNEL_COLS
+                missing = _CHANNEL_COLS - received_channels
+                if missing:
+                    log.warning(
+                        "EKSİK KANALLAR: %s. Bu kanallar 0.0 olarak doldurulacak. "
+                        "Model performansı düşebilir.",
+                        sorted(missing)
+                    )
+                else:
+                    log.info(
+                        "✓ Tüm 14 STEW kanalı Cortex stream'inde mevcut."
+                    )
                 return cols
 
         log.warning("EEG sütunları yanıtta bulunamadı, varsayılan kullanılıyor.")
@@ -441,7 +451,8 @@ class CortexClient:
         Her öğe:
             {
                 "timestamp":      float,
-                "channels":       {"AF3": float, ..., "O2": float},
+                "channels":       {"AF3": float, ..., "AF4": float},
+                "epoch_data":     list[list[float]] (512, 14) STEW sırasında,
                 "cognitive_load": "low" | "medium" | "high"
             }
         """
@@ -453,17 +464,18 @@ class CortexClient:
 
         col_map = await self._subscribe_eeg()
         log.info("[session=%s] Gerçek EEG akışı başladı.", app_session_id)
+        log.info(
+            "Kanal sıralaması: %s (STEW uyumlu)",
+            EPOC_CHANNELS
+        )
 
         t_start = time.time()
 
-        # FIX 1: Artık self._ws üzerinden değil, data_queue'dan okuyoruz
         while True:
             await self._refresh_token_if_needed()
 
             try:
-                msg = await asyncio.wait_for(
-                    self._data_queue.get(), timeout=5.0
-                )
+                msg = await asyncio.wait_for(self._data_queue.get(), timeout=5.0)
             except asyncio.TimeoutError:
                 log.debug("Veri kuyruğu boş, bekleniyor...")
                 continue
@@ -478,7 +490,9 @@ class CortexClient:
             if not channels:
                 continue
 
-            self._epoch_buf.append([channels[ch] for ch in EPOC_CHANNELS])
+            # ⚡ KRİTİK: epoch_buf'a EPOC_CHANNELS sırasıyla ekle!
+            # Bu sıra STEW eğitim verisiyle ve eeg_pipeline.py ile aynı.
+            self._epoch_buf.append([channels.get(ch, 0.0) for ch in EPOC_CHANNELS])
 
             if len(self._epoch_buf) < EPOCH_SAMPLES:
                 continue
@@ -502,6 +516,11 @@ class CortexClient:
     def _parse_channels(
         self, row: list[float], col_map: list[str]
     ) -> dict[str, float]:
+        """
+        Cortex'ten gelen ham satırı kanal adı → değer sözlüğüne çevirir.
+        Sıralama bilgisi kaybolmaz — channels.get(ch) ile STEW sırasında
+        yeniden erişilir.
+        """
         result = {}
         for i, col in enumerate(col_map):
             if col in _CHANNEL_COLS and i < len(row):
@@ -524,6 +543,8 @@ class CortexClient:
         """
         Emotiv uygulaması çalışmıyorken sahte EEG verisi üretir.
         Sinyal: alfa (10 Hz) + teta (5.5 Hz) + Gaussian gürültü, 128 Hz
+
+        Üretilen veri EPOC_CHANNELS sırasında, yani STEW uyumlu.
         """
         interval     = 1.0 / SAMPLE_RATE
         t            = 0.0
@@ -552,6 +573,7 @@ class CortexClient:
                 noise = random.gauss(0, 0.3)
                 channels[ch] = round(alpha + theta + noise, 4)
 
+            # ⚡ STEW sıralamasında epoch oluştur
             buf.append([channels[ch] for ch in EPOC_CHANNELS])
 
             if len(buf) >= EPOCH_SAMPLES:

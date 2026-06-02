@@ -1,49 +1,321 @@
+/* ============================================================================
+   NASA-TLX — Otomatik Geçişli Sürüm (EEG-friendly)
+   ============================================================================ */
+
 .nasa-container {
-  max-width: 700px;
-  margin: 40px auto;
-  background: white;
-  padding: 40px;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 30px 20px;
+  background: transparent;
+  overflow-y: auto;
 }
 
-.nasa-container h2 {
+.nasa-card {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  max-width: 900px;
+  width: 100%;
+  padding: 32px 40px;
+}
+
+/* ============ HEADER ============ */
+.nasa-header {
   text-align: center;
-  margin-bottom: 30px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+.nasa-header h2 {
+  font-size: 26px;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+  font-weight: 700;
+}
+
+.nasa-difficulty-label {
+  display: inline-block;
+  background: #3498db;
+  color: #ffffff;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 8px 0 0 0;
+}
+
+/* ============ Otomatik Geçiş Banner ============ */
+.nasa-auto-banner {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  background: linear-gradient(135deg, #fff8e1 0%, #fff3c4 100%);
+  border: 2px solid #ffd54f;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.nasa-countdown-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 110px;
+  padding: 0 16px;
+  border-right: 2px solid #ffd54f;
+}
+
+.nasa-countdown-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #856404;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.nasa-countdown-number {
+  font-size: 56px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  transition: color 0.3s ease;
+}
+
+.nasa-countdown-unit {
+  font-size: 16px;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.nasa-progress-section {
+  flex: 1;
+  min-width: 280px;
+}
+
+.nasa-progress-bar-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 213, 79, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.nasa-progress-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.9s linear, background-color 0.3s ease;
+}
+
+.nasa-warning-text {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  color: #856404;
+  line-height: 1.4;
+}
+
+.nasa-progress-info {
+  margin: 0;
+  font-size: 12px;
+  color: #856404;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+/* ============ Instructions Box ============ */
+.nasa-instructions-box {
+  background: #f0f7ff;
+  border-left: 4px solid #3498db;
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.nasa-instructions-box p {
+  margin: 0;
+  font-size: 14px;
+  color: #2c3e50;
+  line-height: 1.5;
+}
+
+/* ============ NASA-TLX Items ============ */
+.nasa-items {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .nasa-item {
-  margin-bottom: 25px;
+  background: #fafbfc;
+  border: 1px solid #e8ecef;
+  border-radius: 8px;
+  padding: 20px 22px;
+  transition: all 0.25s ease;
 }
 
-.nasa-item label {
-  display: block;
+.nasa-item.completed {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-color: #22c55e;
+}
+
+.nasa-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.nasa-item-label {
+  font-size: 17px;
   font-weight: 600;
-  margin-bottom: 8px;
+  color: #2c3e50;
 }
 
-.nasa-item input[type="range"] {
-  width: 100%;
+.nasa-item-check {
+  color: #22c55e;
+  font-size: 20px;
+  font-weight: 700;
 }
 
-.nasa-item span {
-  display: inline-block;
-  margin-top: 5px;
+.nasa-item-description {
+  color: #475569;
+  font-size: 13.5px;
+  line-height: 1.5;
+  margin: 0 0 14px 0;
+}
+
+/* ============ 5 Noktalı Seçim ============ */
+.nasa-slider-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.nasa-anchor {
+  font-size: 12px;
+  color: #475569;
   font-weight: 600;
+  min-width: 70px;
+  white-space: nowrap;
+  margin-top: 12px;
 }
 
-.nasa-container button {
-  margin-top: 30px;
-  width: 100%;
-  padding: 15px;
-  border: none;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  font-weight: 600;
+.nasa-anchor-low { text-align: right; }
+.nasa-anchor-high { text-align: left; }
+
+.nasa-points-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.nasa-points-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  padding: 10px 0;
+}
+
+.nasa-points-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: #e2e8f0;
+  transform: translateY(-50%);
+  z-index: 1;
+  border-radius: 3px;
+}
+
+.nasa-point {
+  width: 22px;
+  height: 22px;
+  background: #ffffff;
+  border: 3px solid #cbd5e0;
+  border-radius: 50%;
+  z-index: 2;
   cursor: pointer;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.nasa-point:hover {
+  border-color: #20c997;
+  transform: scale(1.15);
+}
+
+.nasa-point.active {
+  border-color: #20c997 !important;
+  background: #20c997 !important;
+  box-shadow: 0 0 0 4px rgba(32, 201, 151, 0.2) !important;
+}
+
+.nasa-points-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #475569;
+  font-weight: 600;
+  margin-top: 2px;
+  padding: 0 2px;
+}
+
+/* ============ Footer Info ============ */
+.nasa-footer-info {
+  margin-top: 24px;
+  text-align: center;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e0;
+}
+
+.nasa-auto-info {
+  margin: 0;
+  font-size: 14px;
+  color: #475569;
+  font-style: italic;
+}
+
+/* ============ Responsive ============ */
+@media (max-width: 768px) {
+  .nasa-card {
+    padding: 24px 20px;
+  }
+
+  .nasa-auto-banner {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .nasa-countdown-section {
+    border-right: none;
+    border-bottom: 2px solid #ffd54f;
+    padding: 0 0 14px 0;
+    width: 100%;
+  }
+
+  .nasa-countdown-number {
+    font-size: 48px;
+  }
+
+  .nasa-slider-wrapper {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nasa-anchor {
+    min-width: auto;
+    text-align: center;
+  }
 }

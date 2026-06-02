@@ -1,0 +1,285 @@
+/* ============================================================================
+   ConsentForm.css — Onam Formu Stilleri 
+   ============================================================================ */
+
+.consent-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px; /* Kenarlardan biraz boşluk bırakmak her zaman iyidir */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.consent-card {
+  background: white;
+  border-radius: 32px !important; /* Dış ana beyaz kart */
+  max-width: 650px; 
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.consent-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.2rem 1.5rem; 
+  text-align: center;
+  border-radius: 32px 32px 0 0 !important; /* Üstteki mor başlık */
+}
+
+.consent-header h1 {
+  margin: 0;
+  font-size: 1.6rem; 
+  font-weight: 600;
+}
+
+.consent-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.95;
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* ====== BODY ====== */
+.consent-body {
+  padding: 24px 32px;
+  max-height: 65vh; 
+  overflow-y: auto;
+}
+
+.consent-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.consent-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.consent-body::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+.consent-body::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+.consent-section {
+  margin-bottom: 20px; 
+  line-height: 1.6;
+  color: #2d3748;
+}
+
+.consent-section h3 {
+  color: #4f46e5;
+  font-size: 1rem; 
+  font-weight: 600;
+  margin: 0 0 10px 0; 
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.consent-section p {
+  margin: 0 0 10px 0; 
+  font-size: 0.9rem; 
+}
+
+.consent-greeting {
+  font-size: 1rem !important;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.consent-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px 0;
+}
+
+.consent-list li {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: #f7fafc;
+  border-left: 3px solid #667eea;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+/* Özel section'lar */
+.consent-safety {
+  background: #f0fdf4;
+  padding: 16px; 
+  border-radius: 8px;
+  border-left: 4px solid #22c55e;
+}
+
+.consent-safety h3 {
+  color: #15803d;
+}
+
+.consent-contact {
+  background: #fef3c7;
+  padding: 16px; 
+  border-radius: 8px;
+  border-left: 4px solid #f59e0b;
+}
+
+.consent-contact h3 {
+  color: #92400e;
+}
+
+.consent-contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+}
+
+.consent-contact-list li {
+  padding: 4px 0;
+  font-size: 0.85rem;
+  color: #78350f;
+}
+
+.consent-thanks {
+  text-align: center;
+  font-style: italic;
+  color: #92400e;
+  margin-top: 10px !important;
+}
+
+/* ====== FOOTER (Checkbox + Buttons) ====== */
+.consent-footer {
+  background: #f7fafc;
+  padding: 20px 32px;
+  border-top: 2px solid #e2e8f0;
+}
+
+/* Onay kutucuğu alanı (OVAL YAPILDI) */
+.consent-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  padding: 14px; 
+  background: white;
+  border: 2px solid #e2e8f0;
+  margin-bottom: 16px; 
+  transition: all 0.2s ease;
+  border-radius: 20px !important; 
+}
+
+.consent-checkbox-label:hover {
+  border-color: #667eea;
+  background: #fafbff;
+}
+
+.consent-checkbox {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: #4f46e5;
+  flex-shrink: 0;
+}
+
+.consent-checkbox-text {
+  flex: 1;
+  font-size: 0.9rem; 
+  line-height: 1.5;
+  color: #2d3748;
+}
+
+.consent-checkbox-text strong {
+  color: #4f46e5;
+}
+
+/* ====== BUTTONS ====== */
+.consent-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* Devam Et butonları (OVAL YAPILDI) */
+.consent-button {
+  padding: 12px 28px; 
+  border: none;
+  font-size: 0.95rem; 
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  border-radius: 20px !important; 
+}
+
+.consent-button-accept {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.consent-button-accept:hover:not(.disabled) {
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+}
+
+.consent-button-accept.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #cbd5e0;
+  box-shadow: none;
+}
+
+.consent-button-decline {
+  background: white;
+  color: #4a5568;
+  border: 2px solid #cbd5e0;
+}
+
+.consent-button-decline:hover {
+  background: #f7fafc;
+  border-color: #a0aec0;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+  .consent-container {
+    padding: 12px;
+  }
+  
+  .consent-header,
+  .consent-body,
+  .consent-footer {
+    padding: 20px;
+  }
+  
+  .consent-header h1 {
+    font-size: 1.3rem;
+  }
+  
+  .consent-subtitle {
+    font-size: 0.8rem;
+  }
+  
+  .consent-body {
+    max-height: 55vh;
+  }
+  
+  .consent-buttons {
+    flex-direction: column-reverse;
+  }
+  
+  .consent-button {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .consent-card {
+    max-width: 700px; 
+  }
+}
