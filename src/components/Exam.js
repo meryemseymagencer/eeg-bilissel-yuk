@@ -1,39 +1,39 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { questions, timeByDifficulty, blockDuration, difficultyOrder, protocolConfig } from '../data/questions';
-import CalibrationScreen from './CalibrationScreen'; // YENİ: Kalibrasyon ekranını import et
+import { questions, blockDuration, difficultyOrder, protocolConfig } from '../data/questions';
 import './Exam.css';
 
 // ============================================================================
-// Exam Component
+// Exam Component (v3.0 — Uzamsal + Bellek)
+// ----------------------------------------------------------------------------
+// State machine:
+//   'stimulus' → (stimDur ms) → 'question' → (cevap/timeout) → 'stimulus' | sonu
+//
+// Yeni özellikler:
+//   - Bellek soruları için stimulus gösterim fazı (stimType: simple/sequence/sternberg/nback)
+//   - Görsel içerik render (gorsel.icerik HTML)
+//   - Tüm cevaplar buton tıklaması — klavye etkileşimi YOK (EEG sinyal kalitesi)
 // ============================================================================
 
-const Exam = ({ 
-  userInfo, 
-  startDifficultyIndex, 
-  onFinishLevel, 
-  onFinishExam, 
-  syncMarker,
-  appState,      // YENİ PROP: App.js'den gelen backend faz durumu
-  eegConnected,  // YENİ PROP: App.js'den gelen WS bağlantı durumu
-  latestSample   // YENİ PROP: App.js'den gelen güncel EEG verisi
-}) => {
+const Exam = ({ userInfo, startDifficultyIndex, onFinishLevel, onFinishExam, syncMarker }) => {
 
   // ── State Machine ──────────────────────────────────────────────────────────
-  const [showCalibration, setShowCalibration] = useState(true); // YENİ: Kalibrasyon fazı
   const [phase, setPhase] = useState('question');
   const [currentDifficultyIndex] = useState(startDifficultyIndex);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [answers, setAnswers] = useState([]);
-  const [timeLeft, setTimeLeft] = useState(null);
-  
-  // (Kodun geri kalanı aynı şekilde devam ediyor: Blok zamanlayıcısı, refs, vb.)
+  const answersRef = useRef([]);   // ⚡ Blok timer bayat closure'dan kaçınmak için
+  // ⚡ timeLeft kaldırıldı (soru-başına timer yok)
+
+  // Blok zamanlayıcısı (sabit süre blok tasarımı)
   const [blockTimeLeft, setBlockTimeLeft] = useState(null);
   const blockTimerRef = useRef(null);
-  const blockFinishedRef = useRef(false);
+  const blockFinishedRef = useRef(false);  // çift tetiklemeyi önler
 
+  // Stimulus fazı için görsel durum
   const [stimDisplay, setStimDisplay] = useState({ type: null, itemIndex: 0 });
 
+  // ── Refs ───────────────────────────────────────────────────────────────────
   const timerRef          = useRef(null);
   const stimTimerRef      = useRef(null);
   const stimItemRef       = useRef(null);
@@ -41,32 +41,36 @@ const Exam = ({
   const hasSubmittedRef   = useRef(false);
   const blockStartSentRef = useRef(false);
 
+  // ── Türetilmiş değerler ────────────────────────────────────────────────────
   const currentDifficulty  = difficultyOrder[currentDifficultyIndex];
   const currentQuestions   = questions[currentDifficulty];
   const currentQuestion    = currentQuestions[currentQuestionIndex];
-  const maxTime            = timeByDifficulty[currentDifficulty];
-  const timePercentage     = (maxTime && timeLeft !== null) ? (timeLeft / maxTime) * 100 : 0;
+  // ⚡ maxTime / timePercentage kaldırıldı (soru-başına timer yok)
   const progressPercentage = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
 
+  // ── Marker yardımcısı ──────────────────────────────────────────────────────
   const sendMarker = useCallback((eventType, metadata = {}) => {
     if (typeof syncMarker === 'function') {
       syncMarker(eventType, performance.now(), metadata);
     }
   }, [syncMarker]);
 
+  // ── Yardımcı: sonraki soru için doğru fazı belirle ────────────────────────
   const phaseForQuestion = useCallback((q) => {
     return q?.stimType ? 'stimulus' : 'question';
   }, []);
 
-  // YENİ: Kalibrasyon tamamlandığında çalışacak fonksiyon
-  const handleCalibrationComplete = () => {
-    setShowCalibration(false);
-    sendMarker('calibration_end', { timestamp: performance.now() });
-    
-    // Blok ve ilk soru başlangıcını kalibrasyondan sonra yap
+  // =========================================================================
+  // BAŞLANGIÇ — Blok başlangıcı
+  // =========================================================================
+  useEffect(() => {
+    setCurrentQuestionIndex(0);
+    setSelectedAnswer(null);
+    hasSubmittedRef.current   = false;
+    blockStartSentRef.current = false;
     const firstQ = questions[currentDifficulty]?.[0];
     setPhase(phaseForQuestion(firstQ));
-    
+
     if (!blockStartSentRef.current) {
       sendMarker('block_start', {
         difficulty:        currentDifficulty,
@@ -75,44 +79,35 @@ const Exam = ({
       });
       blockStartSentRef.current = true;
     }
-  };
-
-  // YENİ: Kalibrasyon açıkken blok süresini (useEffect'i) durdurmamız lazım.
-  // MEVCUT "BAŞLANGIÇ — Blok başlangıcı" kodunu YORUMA ALIYORUZ VEYA SİLİYORUZ. 
-  // Çünkü başlatma işini handleCalibrationComplete fonksiyonuna taşıdık.
-  
-  /* ESKİ KOD - SİLİNECEK veya YORUMA ALINACAK:
-  useEffect(() => {
-    // ...
   }, [currentDifficultyIndex, currentDifficulty, currentQuestions.length, sendMarker, phaseForQuestion]);
-  */
 
   // =========================================================================
   // BLOK ZAMANLAYICISI — Sabit süre dolunca seviyeyi bitir
   // =========================================================================
   useEffect(() => {
-    if (showCalibration) return; // YENİ: Kalibrasyondayken blok zamanlayıcı çalışmasın
-
     blockFinishedRef.current = false;
     const totalSec = blockDuration[currentDifficulty] ?? 120;
     setBlockTimeLeft(totalSec);
 
     blockTimerRef.current = setInterval(() => {
-        // (Zamanlayıcı mantığı aynı kalıyor)
       setBlockTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(blockTimerRef.current);
           if (!blockFinishedRef.current) {
             blockFinishedRef.current = true;
-            const levelAnswers = []; 
+            // ⚡ 0/0 BUG FIX: answersRef'ten bu seviyenin cevaplarını al
+            const levelAnswers = answersRef.current.filter(
+              a => a.difficulty === currentDifficulty
+            );
             sendMarker('block_end', {
               difficulty: currentDifficulty,
               difficulty_index: currentDifficultyIndex,
               reason: 'block_time_expired',
+              answers_count: levelAnswers.length,
             });
             onFinishLevel(currentDifficulty, levelAnswers);
             if (currentDifficultyIndex >= difficultyOrder.length - 1) {
-              if (typeof onFinishExam === 'function') onFinishExam([]);
+              if (typeof onFinishExam === 'function') onFinishExam(answersRef.current);
             }
           }
           return 0;
@@ -122,23 +117,13 @@ const Exam = ({
     }, 1000);
 
     return () => clearInterval(blockTimerRef.current);
-  }, [currentDifficultyIndex, showCalibration]); // YENİ: showCalibration bağımlılığı eklendi
+  }, [currentDifficultyIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // =========================================================================
+  // FAZ: STIMULUS — Bellek uyaranını göster, stimDur ms sonra soru fazına geç
+  // =========================================================================
   useEffect(() => {
-  // =========================================================================
-  // RENDER: KALİBRASYON EKRANI (YENİ)
-  // =========================================================================
-    if (showCalibration) {
-      return (
-        <CalibrationScreen 
-          onCalibrationComplete={handleCalibrationComplete}
-          appState={appState}
-          connected={eegConnected}
-          latestSample={latestSample}
-        />
-      );
-    }
-    if (phase !== 'stimulus' || showCalibration) return; // YENİ Kontrol
+    if (phase !== 'stimulus') return;
 
     const q = currentQuestion;
     const dur = q.stimDur ?? 2000;
@@ -201,7 +186,9 @@ const Exam = ({
   }, [phase, currentQuestionIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // =========================================================================
-  // FAZ: QUESTION — Soruyu göster, timer başlat
+  // FAZ: QUESTION — Soruyu göster
+  // ⚡ Soru başına timer KALDIRILDI. Süre yönetimi yalnızca blok timer'ında.
+  //    Kullanıcı kendi temposunda cevaplar; soru otomatik atlamaz.
   // =========================================================================
   useEffect(() => {
     if (phase !== 'question') return;
@@ -215,16 +202,8 @@ const Exam = ({
       question_index: currentQuestionIndex
     });
 
-    setTimeLeft(maxTime);
     setSelectedAnswer(null);
     hasSubmittedRef.current = false;
-
-    clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => (prev <= 1 ? 0 : prev - 1));
-    }, 1000);
-
-    return () => clearInterval(timerRef.current);
   }, [phase, currentQuestionIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // =========================================================================
@@ -233,8 +212,6 @@ const Exam = ({
   const submitAnswer = useCallback((selectedIndex, isTimeout = false) => {
     if (hasSubmittedRef.current) return;
     hasSubmittedRef.current = true;
-
-    clearInterval(timerRef.current);
 
     const rtMs = questionStartRef.current
       ? Math.round(performance.now() - questionStartRef.current)
@@ -250,7 +227,7 @@ const Exam = ({
       correctAnswer:  currentQuestion.correctAnswer,
       isCorrect,
       points:         isCorrect ? currentQuestion.points : 0,
-      timeUsed:       maxTime - (timeLeft ?? maxTime),
+      timeUsed:       rtMs !== null ? Math.round(rtMs / 1000) : null, // ⚡ RT'den saniye
       rt_ms:          rtMs,
       question:       currentQuestion.question,
       timedOut:       isTimeout
@@ -266,7 +243,7 @@ const Exam = ({
       rt_ms:           rtMs
     });
 
-    // Buton basımı sonrası motor artefakt kırpma (700ms)
+    // Buton basımı sonrası motor artefakt kırpma
     if (!isTimeout) {
       sendMarker('response_crop', performance.now(), {
         question_id: currentQuestion.id,
@@ -276,11 +253,10 @@ const Exam = ({
 
     const newAnswers = [...answers, answerData];
     setAnswers(newAnswers);
+    answersRef.current = newAnswers;   // ⚡ Ref'i de güncel tut (blok timer için)
 
     if (currentQuestionIndex >= currentQuestions.length - 1) {
-      // Tüm sorular bitti, blok timer hâlâ çalışıyor olabilir.
-      // Blok timer zaten onFinishLevel'i çağıracak; burada sadece
-      // son soruya geldiğimizde timer'ı erken sonlandır.
+      // Son soru cevaplandı — sorular tükendi, seviyeyi bitir
       clearInterval(blockTimerRef.current);
       if (!blockFinishedRef.current) {
         blockFinishedRef.current = true;
@@ -303,16 +279,12 @@ const Exam = ({
     }
   }, [
     currentQuestion, currentDifficulty, currentDifficultyIndex,
-    currentQuestionIndex, currentQuestions, maxTime, timeLeft,
+    currentQuestionIndex, currentQuestions,
     answers, onFinishLevel, onFinishExam, sendMarker, phaseForQuestion
   ]);
 
-  // Timeout kontrolü
-  useEffect(() => {
-    if (phase === 'question' && timeLeft === 0 && !hasSubmittedRef.current) {
-      submitAnswer(null, true);
-    }
-  }, [timeLeft, phase, submitAnswer]);
+  // ⚡ Soru başına timeout KALDIRILDI.
+  //    Soru, yalnızca kullanıcı cevaplayınca ilerler. Süre kontrolü blok timer'ında.
 
   // Cleanup
   useEffect(() => {
@@ -455,26 +427,11 @@ const Exam = ({
           <div className="exam-info">
             <h2 className="exam-title">Bilişsel Yük Çalışması</h2>
             <p className="exam-participant">
-              {userInfo.firstName} {userInfo.lastName}
+              {userInfo.participantId || ''}
             </p>
           </div>
-
-          <div className="exam-timer-wrapper">
-            <div className="exam-timer">
-              <span className="timer-icon">⏱</span>
-              <span className="timer-time">{formatTime(timeLeft)}</span>
-            </div>
-            <div className="timer-progress-bar">
-              <div
-                className="timer-progress-fill"
-                style={{
-                  width: `${timePercentage}%`,
-                  backgroundColor: timePercentage > 50 ? diffColor
-                    : timePercentage > 20 ? '#f39c12' : '#e74c3c'
-                }}
-              />
-            </div>
-          </div>
+          {/* ⚡ Sağ üst köşedeki soru-başına timer KALDIRILDI.
+              Süre yalnızca aşağıdaki blok geri sayımında gösterilir. */}
         </div>
 
         {/* PROGRESS — Blok geri sayım */}

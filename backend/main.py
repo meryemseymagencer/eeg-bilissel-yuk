@@ -2,11 +2,11 @@
 main.py — FastAPI Backend (v3 - Sinyal İşleme Entegre)
 ============================================================
 Bu versiyondaki değişiklikler:
-  1. Bandpass filtre eklendi (1-45 Hz, Butterworth 4. derece)
+  1. ⚡ Bandpass filtre eklendi (1-45 Hz, Butterworth 4. derece)
      Sebep: Lim et al. (2018) STEW ve Wang et al. (2024) ARFN ile uyumlu
-  2. Notch filtre eklendi (50 Hz, Türkiye şebeke gürültüsü)
+  2. ⚡ Notch filtre eklendi (50 Hz, Türkiye şebeke gürültüsü)
      Sebep: Türkiye'de elektrik 50 Hz; bu olmadan EEG'de büyük bir 50 Hz pik var
-  3. Stateful filtering (sosfilt_zi) — gerçek zamanlı akış için
+  3. ⚡ Stateful filtering (sosfilt_zi) — gerçek zamanlı akış için
      Sebep: Her chunk başında "filter transient" oluşmasını önler
   4. Per-session filter state — her oturum için bağımsız filter durumu
 
@@ -53,8 +53,17 @@ app.add_middleware(
 sessions = {}
 
 # ============================================================================
-# ARFN MODELİ YÜKLEME 
+# ⚡ ARFN MODELİ YÜKLEME (v3 - Hibrit: Mimari koddan + Ağırlıklar dosyadan)
 # ----------------------------------------------------------------------------
+# Bu yöntem TensorFlow versiyon uyumsuzluğunu çözer:
+#   1. Model mimarisini gemini.py'daki build_model() ile oluştur
+#   2. Sadece ağırlıkları (arfn_v2_weights.weights.h5) yükle
+#   3. Sonuç: TF versiyonundan bağımsız, %78.2 doğruluk
+# 
+# Fallback sırası:
+#   1. arfn_v2_weights.weights.h5 + build_model() (YENİ, %78.2)
+#   2. arfn_v2_model.h5 (tam yükleme, TF uyumlu ise %78.2)
+#   3. arfn_model.h5 (ESKİ, %70.1) - güvenli geri dönüş
 # ----------------------------------------------------------------------------
 custom_objects = {'FeatureAttention': FeatureAttention, 'FuzzyLayer': FuzzyLayer}
 model = None
@@ -65,12 +74,52 @@ try:
     models_dir = os.path.join(os.path.dirname(__file__), 'models')
     
     weights_path = os.path.join(models_dir, 'arfn_v2_weights.weights.h5')
+    v2_model_path = os.path.join(models_dir, 'arfn_v2_model.h5')
     v1_model_path = os.path.join(models_dir, 'arfn_model.h5')
-    print(f"Eski v1 modeline geri dönülüyor: {v1_model_path}")
-    model = tf.keras.models.load_model(v1_model_path, custom_objects=custom_objects)
-    model_version = "ARFN v1 (eski, Test Acc: %70.1)"
-    print(f"ARFN v1 modeli yüklendi! ✓")
-    print(f"  Model versiyonu: {model_version}")
+    
+    # YÖNTEM 1: Mimariyi koddan oluştur + sadece ağırlıkları yükle
+    if os.path.exists(weights_path):
+        try:
+            from gemini import build_model
+            print("📦 build_model() ile mimari oluşturuluyor...")
+            model = build_model(initial_centers=None)
+            
+            # Modeli compile et (load_weights için gerekli olabilir)
+            model.compile(
+                optimizer='adam',
+                loss='categorical_crossentropy',
+                metrics=['accuracy']
+            )
+            
+            print(f"📥 Ağırlıklar yükleniyor: {weights_path}")
+            model.load_weights(weights_path)
+            model_version = "ARFN v2 (mimari+ağırlık, Test Acc: %78.2)"
+            print(f"✓ ARFN v2 modeli başarıyla yüklendi! (hibrit yöntem)")
+            print(f"  Model versiyonu: {model_version}")
+        except Exception as e_weights:
+            print(f"⚠️ Hibrit yükleme başarısız: {type(e_weights).__name__}")
+            print(f"   Detay: {str(e_weights)[:200]}")
+            model = None
+    
+    # YÖNTEM 2: Tam model yüklemeyi dene (eğer TF uyumluysa)
+    if model is None and os.path.exists(v2_model_path):
+        try:
+            print(f"📥 Tam v2 modeli yükleniyor: {v2_model_path}")
+            model = tf.keras.models.load_model(v2_model_path, custom_objects=custom_objects)
+            model_version = "ARFN v2 (tam model, Test Acc: %78.2)"
+            print(f"✓ ARFN v2 modeli başarıyla yüklendi! (tam yöntem)")
+            print(f"  Model versiyonu: {model_version}")
+        except Exception as e_v2:
+            print(f"⚠️ Tam v2 yükleme başarısız: {type(e_v2).__name__}")
+            model = None
+    
+    # YÖNTEM 3: Eski v1 modeline geri dön (güvenli yedek)
+    if model is None and os.path.exists(v1_model_path):
+        print(f"📥 Eski v1 modeline geri dönülüyor: {v1_model_path}")
+        model = tf.keras.models.load_model(v1_model_path, custom_objects=custom_objects)
+        model_version = "ARFN v1 (eski, Test Acc: %70.1)"
+        print(f"✓ ARFN v1 modeli yüklendi! (yedek)")
+        print(f"  Model versiyonu: {model_version}")
 except Exception as e:
     print(f"✗ Model yükleme hatası: {e}")
     model = None
@@ -231,9 +280,10 @@ async def create_session(data: UserInfo):
         "baseline_mean": None,
         "baseline_std": None,
         "raw_stew_data": [],
-        "calibration_chunks": 0,
-        "crop_until_ts": None,                 # buton basımı sonrası kırpma bitiş zamanı (saniye)
-        "cropped_sample_count": 0,             # istatistik için
+        "calibration_chunks": 0,              # ⚡ YENİ: kaç chunk toplandı
+        "level_save_cursor": 0,               # ⚡ YENİ: seviye-kayıt imleci
+        "level_saves": [],                    # ⚡ YENİ: seviye-kayıt geçmişi
+        # ⚡ YENİ
         "zi_bandpass": zi_bp,
         "zi_notch": zi_notch,
         "filtered_eeg_data": []
@@ -301,19 +351,6 @@ async def add_marker(session_id: str, data: MarkerData):
 
     if data.event_type in ["question_onset", "question_response", "block_start", "block_end"]:
         print(f"[{session_id[:8]}] MARKER: {data.event_type} | meta: {data.metadata}")
-
-    # ============================================================
-    # BUTON BASIMI KIRPMA — Motor artefakt 700ms
-    # Frontend "response_crop" gönderince crop_until_ts set edilir.
-    # WebSocket loop'u bu süre içindeki örnekleri EEG verisinden çıkarır.
-    # ============================================================
-    if data.event_type == "response_crop":
-        crop_ms = (data.metadata or {}).get("crop_ms", 700)
-        # client timestamp ms → saniyeye çevir (sunucu zamanıyla değil,
-        # EEG timestamp'ı ile karşılaştırılacak; WebSocket'te time.time() tabanlı)
-        sessions[session_id]["crop_until_ts"] = time.time() + crop_ms / 1000.0
-        print(f"[{session_id[:8]}] CROP: Sonraki {crop_ms}ms EEG verisi kırpılacak "
-              f"(~{int(crop_ms * 128 / 1000)} sample @ 128Hz)")
 
     return {"status": "success", "marker_id": len(sessions[session_id]["markers"]) - 1}
 
@@ -404,6 +441,7 @@ async def finalize_session(session_id: str):
             "user_info": user_info,
             "calibration_chunks_collected": s.get("calibration_chunks", 0),
             "total_eeg_samples": len(s.get("filtered_eeg_data", [])),
+            "level_saves": s.get("level_saves", []),   # ⚡ Hangi seviye, hangi index aralığı
             "filter_settings": {
                 "bandpass": "1-45 Hz Butterworth (order=4)",
                 "notch": "50 Hz Notch (Q=30)",
@@ -493,6 +531,102 @@ async def finalize_session(session_id: str):
     except Exception as e:
         print(f"[{session_id[:8]}] ✗ Finalize error: {e}")
         raise HTTPException(status_code=500, detail=f"Finalize failed: {str(e)}")
+
+
+# ============================================================================
+# ⚡ YENİ: SEVİYE SİNYALİ KAYDET — Her seviye bitince o seviyenin EEG'sini diske yaz
+# ============================================================================
+@app.post("/api/session/{session_id}/save-level")
+async def save_level_eeg(session_id: str, level: str = "unknown"):
+    """
+    Bir seviye (kolay/orta/zor) bittiğinde, o seviyeye ait EEG sinyalini
+    ayrı bir dosyaya kaydeder.
+
+    Yöntem: "Son kayıttan bu yana biriken sinyal" mantığı.
+      - ses["level_save_cursor"] : filtered_eeg_data listesinde en son
+        nereye kadar kaydettiğimizi tutar.
+      - Bu çağrıda cursor'dan listenin sonuna kadar olan kısım = bu seviyenin sinyali.
+
+    Çıktı:
+      session_data/PXX_session_xxx/eeg_{level}.txt   (filtrelenmiş, STEW formatı)
+      session_data/PXX_session_xxx/eeg_{level}_raw.txt (ham)
+
+    Frontend her seviye bitince (block_end) bunu çağırır.
+    """
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    s = sessions[session_id]
+    user_info = s.get("user_info", {})
+
+    participant_id = user_info.get("participantId") or f"P_{session_id[:8]}"
+    safe_pid = "".join(c for c in participant_id if c.isalnum() or c == "_")
+    safe_level = "".join(c for c in str(level) if c.isalnum() or c == "_") or "unknown"
+
+    # Klasör
+    base_dir = os.path.join(os.path.dirname(__file__), "session_data")
+    folder_name = f"{safe_pid}_session_{session_id[:8]}"
+    folder_path = os.path.join(base_dir, folder_name)
+    os.makedirs(folder_path, exist_ok=True)
+
+    # Cursor: en son nereye kadar kaydettik?
+    cursor = s.get("level_save_cursor", 0)
+
+    filtered = s.get("filtered_eeg_data", [])
+    raw = s.get("raw_stew_data", [])
+
+    # Bu seviyenin dilimi = cursor'dan listenin sonuna kadar
+    filtered_slice = filtered[cursor:]
+    raw_slice = raw[cursor:]
+    end_index = len(filtered)
+
+    files_created = []
+
+    try:
+        # Filtrelenmiş sinyal (analiz için ana dosya)
+        if filtered_slice:
+            fpath = os.path.join(folder_path, f"eeg_{safe_level}.txt")
+            with open(fpath, "w") as f:
+                for row in filtered_slice:
+                    f.write(",".join(str(v) for v in row[:14]) + "\n")
+            files_created.append(f"eeg_{safe_level}.txt ({len(filtered_slice)} samples)")
+
+        # Ham sinyal (yedek)
+        if raw_slice:
+            rpath = os.path.join(folder_path, f"eeg_{safe_level}_raw.txt")
+            with open(rpath, "w") as f:
+                for row in raw_slice:
+                    f.write(",".join(str(v) for v in row[:14]) + "\n")
+            files_created.append(f"eeg_{safe_level}_raw.txt ({len(raw_slice)} samples)")
+
+        # Cursor'u ilerlet → sonraki seviye buradan başlayacak
+        s["level_save_cursor"] = end_index
+
+        # Seviye kayıt geçmişini tut (metadata için)
+        s.setdefault("level_saves", []).append({
+            "level": safe_level,
+            "start_index": cursor,
+            "end_index": end_index,
+            "sample_count": len(filtered_slice),
+            "saved_at": time.time()
+        })
+
+        print(f"[{session_id[:8]}] ✓ Seviye sinyali kaydedildi: {safe_level} "
+              f"({len(filtered_slice)} sample, index {cursor}→{end_index})")
+
+        return {
+            "status": "success",
+            "level": safe_level,
+            "sample_count": len(filtered_slice),
+            "start_index": cursor,
+            "end_index": end_index,
+            "files_created": files_created,
+            "folder_path": folder_path
+        }
+
+    except Exception as e:
+        print(f"[{session_id[:8]}] ✗ save-level error ({safe_level}): {e}")
+        raise HTTPException(status_code=500, detail=f"save-level failed: {str(e)}")
 
 
 # ============================================================================
@@ -587,15 +721,6 @@ async def eeg_stream(websocket: WebSocket, session_id: str):
                 base_time = sample["timestamp"] - 4.0
 
                 for idx in range(len(raw_chunk)):
-                    # Kırpma kontrolü: buton basımından sonraki 700ms atlanır
-                    sample_time = base_time + (idx / 128.0)
-                    crop_until = ses.get("crop_until_ts")
-                    is_cropped = crop_until is not None and sample_time < crop_until
-
-                    if is_cropped:
-                        ses["cropped_sample_count"] = ses.get("cropped_sample_count", 0) + 1
-                        continue  # Bu sample'ı kaydetme
-
                     # Ham veri (STEW formatı için)
                     ses["raw_stew_data"].append(raw_chunk[idx, :14].tolist())
                     # Filtrelenmiş veri (analiz için)

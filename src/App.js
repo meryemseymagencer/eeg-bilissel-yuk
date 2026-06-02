@@ -1,53 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import ConsentForm from './components/ConsentForm';
 import UserForm from './components/UserForm';
 import Exam from './components/Exam';
 import Result from './components/Result';
 import NasaTLX from './components/NasaTLX';
-import UEQS from './components/UEQS';
+import CalibrationScreen from './components/CalibrationScreen';
 import useSession from './hooks/useSession';
 import useEEGStream from './hooks/useEEGStream';
 import './App.css';
 
 function App() {
-  // Akış: consent → form → exam → nasa → result
-  //                                 ↓ (opsiyonel)
-  //                                ueqs → result (UEQ-S doldurulmuş)
-  const [step, setStep] = useState('consent');
-  
-  const [consentInfo, setConsentInfo] = useState(null);
+  const [step, setStep] = useState('form');
   const [userInfo, setUserInfo] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [difficultyIndex, setDifficultyIndex] = useState(0);
   const [currentDifficulty, setCurrentDifficulty] = useState(null);
 
+  // NASA-TLX yeni veri yapısı:
+  // { kolay: {rtlxScore, rawValues, adjustedValues}, orta: {...}, zor: {...} }
   const [nasaByDifficulty, setNasaByDifficulty] = useState({
     kolay: null,
     orta: null,
     zor: null
   });
 
-  const [ueqsData, setUeqsData] = useState(null);
-
+  // ⚡ Yeni: syncMarker ve syncNasaDetailed eklendi
   const {
     sessionId,
     backendOnline,
-    finalizeStatus,        
     createSession,
-    finalizeSession,     
     syncAnswers,
-    syncNasa,
-    syncNasaDetailed,
-    syncMarker,
-    syncUeqs,              
+    syncNasa,           // Eski format (geriye dönük uyumluluk)
+    syncNasaDetailed,   // ⚡ Yeni
+    syncMarker,         // ⚡ Yeni — Exam.js'e geçilecek
+    saveLevelEEG,       // ⚡ Yeni — her seviye bitince sinyal kaydı
     reset: resetSession
   } = useSession();
 
-  // YENİ HALİ: Sınav boyunca (exam, nasa) bağlantıyı aktif tut,
-  // Result ekranına geçildiğinde bağlantı kapansın ama veriler App.js'de kalsın.
-  const eegActive = !!sessionId && (step === 'exam' || step === 'nasa');
+  const eegActive = step === 'calibration' || step === 'exam' || step === 'nasa';
+
   const { cognitiveLoad, timeline, connected: eegConnected, appState } = useEEGStream(sessionId, eegActive);
 
+  // Backend "testing" sinyali gelince sınava geç
+  useEffect(() => {
+    if (step === 'calibration' && appState === 'testing') {
+      syncMarker('calibration_end', performance.now(), {});
+      setStep('exam');
+    }
+  }, [step, appState, syncMarker]);
+
+  // Kalibrasyon başlangıç marker'ı
+  useEffect(() => {
+    if (step === 'calibration' && sessionId) {
+      syncMarker('calibration_start', performance.now(), {});
+    }
+  }, [step, sessionId, syncMarker]);
+
+  // NASA-TLX onset marker (her seviye sonrası)
   useEffect(() => {
     if (step === 'nasa' && currentDifficulty) {
       syncMarker('nasa_onset', performance.now(), {
@@ -56,85 +64,51 @@ function App() {
     }
   }, [step, currentDifficulty, syncMarker]);
 
-  // UEQ-S açıldığında marker
-  useEffect(() => {
-    if (step === 'ueqs' && sessionId) {
-      syncMarker('ueqs_onset', performance.now(), {});
-    }
-  }, [step, sessionId, syncMarker]);
-
-  // ⚡ YENİ: Result ekranı açıldığında session'ı otomatik finalize et
-  // (Tüm verileri diske kaydeder: metadata, eeg, answers, nasa, markers, ueqs)
-  useEffect(() => {
-    if (step === 'result' && sessionId && finalizeStatus === null) {
-      console.log('[App] Result ekranı açıldı → finalize tetikleniyor...');
-      finalizeSession();
-    }
-  }, [step, sessionId, finalizeStatus, finalizeSession]);
-
   const resetApp = () => {
-    setStep('consent');
-    setConsentInfo(null);
+    setStep('form');
     setUserInfo(null);
     setAnswers([]);
     setDifficultyIndex(0);
     setCurrentDifficulty(null);
     setNasaByDifficulty({ kolay: null, orta: null, zor: null });
-    setUeqsData(null);
     resetSession();
   };
 
   return (
     <div className="App">
 
-      {/* 1. ADIM — Onam Formu */}
-      {step === 'consent' && (
-        <ConsentForm
-          onAccept={(info) => {
-            setConsentInfo(info);
-            setStep('form');
-          }}
-          onDecline={() => {
-            alert('Çalışmaya katılım için onam vermek gerekmektedir. Vazgeçtiğiniz için teşekkür ederiz.');
-          }}
-        />
-      )}
-
-      {/* 2. ADIM — Demografik Bilgiler */}
       {step === 'form' && (
         <UserForm
           onStart={(info) => {
-            const fullUserInfo = {
-              ...info,
-              consentInfo: consentInfo
-            };
-            setUserInfo(fullUserInfo);
+            setUserInfo(info);
             setDifficultyIndex(0);
             setCurrentDifficulty(null);
-            setStep('exam');
-            createSession(fullUserInfo);
+            setStep('calibration');
+            createSession(info);
           }}
         />
       )}
 
-      {/* 4. ADIM — Sınav */}
+      {step === 'calibration' && (
+        <CalibrationScreen
+          appState={appState}
+          onCalibrationComplete={() => setStep('exam')}
+        />
+      )}
+
       {step === 'exam' && userInfo && (
         <Exam
           userInfo={userInfo}
           startDifficultyIndex={difficultyIndex}
-          syncMarker={syncMarker}
-          
-          // ⚡ YENİ EKLENEN PROPLAR: CalibrationScreen için gerekli veriler
-          appState={appState}
-          eegConnected={eegConnected}
-          // (Eğer useEEGStream'den latestSample çekiyorsan onu da ekle: latestSample={latestSample})
-
+          syncMarker={syncMarker}              // ⚡ Yeni: marker gönderme
           onFinishLevel={(level, levelAnswers) => {
             setAnswers(prev => [...prev, ...levelAnswers]);
             setCurrentDifficulty(level);
             setDifficultyIndex(prev => prev + 1);
             setStep('nasa');
             syncAnswers(levelAnswers);
+            // ⚡ O seviyenin EEG sinyalini diske kaydet (sessiz, arka planda)
+            saveLevelEEG(level);
           }}
           onFinishExam={(allAnswers) => {
             console.log('[App] Sınav tamamlandı, toplam cevap:', allAnswers.length);
@@ -142,19 +116,20 @@ function App() {
         />
       )}
 
-      {/* 5. ADIM — NASA-TLX (her seviye sonrası) */}
       {step === 'nasa' && currentDifficulty && (
         <NasaTLX
           difficulty={currentDifficulty}
-          syncMarker={syncMarker}              // ⚡ YENİ: EEG pause marker'ları için
           onSubmit={(nasaResult) => {
+            // ⚡ Yeni NASA-TLX veri yapısı
+            // nasaResult = { rawValues, adjustedValues, rtlxScore, difficulty }
+
+            // NASA-TLX submit marker'ı
             syncMarker('nasa_submit', performance.now(), {
               difficulty: currentDifficulty,
-              rtlx_score: nasaResult.rtlxScore,
-              auto_submitted: nasaResult.autoSubmitted,
-              touched_count: nasaResult.touchedCount
+              rtlx_score: nasaResult.rtlxScore
             });
 
+            // State'e kaydet
             setNasaByDifficulty(prev => ({
               ...prev,
               [currentDifficulty]: {
@@ -164,6 +139,7 @@ function App() {
               }
             }));
 
+            // Backend'e gönder — hem eski hem yeni endpoint
             syncNasa(currentDifficulty, nasaResult.rtlxScore.toFixed(1));
             syncNasaDetailed({
               difficulty: currentDifficulty,
@@ -172,7 +148,7 @@ function App() {
               adjustedValues: nasaResult.adjustedValues
             });
 
-            // ⚡ Son seviye bittiyse → direkt Result'a (UEQ-S opsiyonel)
+            // Sonraki adım: zor seviye bittiyse result, değilse sınava devam
             if (difficultyIndex >= 3) {
               setStep('result');
             } else {
@@ -182,45 +158,14 @@ function App() {
         />
       )}
 
-      {/* 6. ADIM — Result Ekranı (UEQ-S butonu burada) */}
       {step === 'result' && (
         <Result
           userInfo={userInfo}
           answers={answers}
           nasaByDifficulty={nasaByDifficulty}
-          ueqsData={ueqsData}
           eegTimeline={timeline}
           sessionId={sessionId}
-          finalizeStatus={finalizeStatus}        // ⚡ YENİ: 'saving'|'saved'|'error'|null
           onRestart={resetApp}
-          onOpenUEQS={() => setStep('ueqs')}
-        />
-      )}
-
-      {/* 7. ADIM — UEQ-S (Opsiyonel, Result'tan açılır) */}
-      {step === 'ueqs' && (
-        <UEQS
-          onSubmit={(ueqsResult) => {
-            setUeqsData(ueqsResult);
-            
-            syncMarker('ueqs_submit', performance.now(), {
-              pragmatic: ueqsResult.pragmaticScore,
-              hedonic: ueqsResult.hedonicScore,
-              overall: ueqsResult.overallScore
-            });
-
-            // ⚡ Backend'e UEQ-S verisini gönder (dosyaya kaydedilecek)
-            syncUeqs(ueqsResult);
-
-            console.log('[App] UEQ-S tamamlandı:', ueqsResult);
-            
-            // Geri Result'a dön
-            setStep('result');
-          }}
-          onCancel={() => {
-            // Vazgeçerse Result'a geri dön
-            setStep('result');
-          }}
         />
       )}
 
